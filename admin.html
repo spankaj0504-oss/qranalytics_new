@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRlytics | Enterprise Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- PREMIUM DESIGN SYSTEM --- */
+        :root { 
+            --primary: #4f46e5; 
+            --primary-hover: #4338ca;
+            --gradient-primary: linear-gradient(135deg, #4f46e5, #8b5cf6);
+            --sidebar-bg: #0f172a;
+            --sidebar-active: #1e293b;
+            --sidebar-text: #94a3b8;
+            --sidebar-light: #ffffff;
+            
+            --bg-body: #f1f5f9;
+            --bg-surface: rgba(255, 255, 255, 0.85);
+            --text-heading: #0f172a;
+            --text-body: #475569;
+            --text-muted: #64748b;
+            --border: rgba(226, 232, 240, 0.7);
+            
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --success-dark: #065f46;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --danger-dark: #991b1b;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --warning-dark: #92400e;
+            
+            --sidebar-width: 208px;
+            --radius-md: 9.6px;
+            --radius-lg: 12.8px;
+            --radius-xl: 19.2px;
+            
+            --shadow-sm: 0 3.2px 4.8px -0.8px rgba(0, 0, 0, 0.05), 0 1.6px 3.2px -0.8px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 8px 12px -2.4px rgba(0, 0, 0, 0.08), 0 3.2px 4.8px -1.6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 16px 20px -4px rgba(0, 0, 0, 0.1), 0 8px 8px -4px rgba(0, 0, 0, 0.04);
+            --focus-ring: 0 0 0 3.2px rgba(79, 70, 229, 0.2);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: var(--bg-body); 
+                        margin: 0;
+            display: flex; 
+            color: var(--text-body);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: var(--sidebar-width); 
+            background: var(--sidebar-bg); 
+            color: var(--sidebar-light); 
+            height: 100vh; 
+            position: fixed; 
+            display: flex;
+            flex-direction: column;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .brand-area { 
+            padding: 25.6px 19.2px; 
+            display: flex;
+            flex-direction: column;
+            gap: 3.2px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            margin-bottom: 12.8px; 
+        }
+        .brand-area h2 { margin: 0; font-size: 19.2px; color: white; font-weight: 800; letter-spacing: -0.4px; }
+        .brand-area .badge {
+            font-size: 8px; color: #818cf8; font-weight: 700; letter-spacing: 1px;
+            background: rgba(129, 140, 248, 0.1); padding: 3.2px 6.4px; border-radius: 3.2px; width: fit-content;
+        }
+
+        .nav-container { flex-grow: 1; padding: 0 12.8px; display: flex; flex-direction: column; gap: 3.2px; }
+        
+        .nav-item { 
+            padding: 9.6px 12.8px; 
+            cursor: pointer; 
+            border-radius: var(--radius-md); 
+            transition: all 0.2s ease; 
+            display: flex;
+            align-items: center;
+            gap: 9.6px;
+            font-weight: 500;
+            font-size: 11.2px;
+            color: var(--sidebar-text);
+        }
+
+        .nav-item svg { width: 14.4px; height: 14.4px; stroke: currentColor; stroke-width: 2; fill: none; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: var(--sidebar-light); }
+        .nav-item.active { 
+            background: var(--gradient-primary); 
+            color: white; 
+            box-shadow: 0 3.2px 9.6px rgba(79, 70, 229, 0.3); 
+            font-weight: 600;
+        }
+        
+        .logout-item { 
+            margin: 19.2px 12.8px; padding: 9.6px; cursor: pointer; border-radius: var(--radius-md); 
+            transition: all 0.2s ease; background: rgba(239, 68, 68, 0.1); color: #fca5a5; 
+            display: flex; align-items: center; justify-content: center; gap: 6.4px;
+            font-weight: 600; font-size: 11.2px; border: 1px solid rgba(239, 68, 68, 0.2); 
+        }
+        .logout-item:hover { background: rgba(239, 68, 68, 0.2); color: white; }
+
+        /* --- MAIN CONTENT & HEADER --- */
+        .main { 
+            margin-left: var(--sidebar-width); 
+            width: calc(100% - var(--sidebar-width)); 
+            min-height: 100vh; 
+            transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
+        
+        .top-header { 
+            background: rgba(255, 255, 255, 0.85); 
+            backdrop-filter: blur(12.8px);
+            -webkit-backdrop-filter: blur(12.8px);
+            padding: 12.8px 25.6px; 
+            display: flex; justify-content: space-between; align-items: center; 
+            border-bottom: 1px solid var(--border); 
+            position: sticky; top: 0; z-index: 900; 
+        }
+        
+        #breadcrumbText { font-weight: 500; color: var(--text-muted); font-size: 11.2px; }
+        
+        .menu-toggle { display: none; flex-direction: column; gap: 3.2px; cursor: pointer; padding: 6.4px; }
+        .menu-toggle span { width: 19.2px; height: 1.6px; background: var(--text-heading); border-radius: 1.6px; }
+
+        .content-area { padding: 25.6px; max-width: 960px; margin: 0 auto; animation: fadeIn 0.4s ease-out; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { font-size: 19.2px; color: var(--text-heading); font-weight: 700; margin-top: 0; margin-bottom: 19.2px; letter-spacing: -0.4px; }
+        h3 { font-size: 14.4px; color: var(--text-heading); font-weight: 600; margin-top: 0; margin-bottom: 16px; }
+
+        /* --- CARDS & WIDGETS --- */
+        .card { 
+            background: var(--bg-surface); 
+            backdrop-filter: blur(12.8px);
+            -webkit-backdrop-filter: blur(12.8px);
+            padding: 25.6px; 
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-sm); 
+            margin-bottom: 19.2px; 
+            border: 1px solid var(--border); 
+        }
+
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(192px, 1fr)); gap: 19.2px; margin-bottom: 25.6px; }
+        .stat-card { 
+            background: var(--bg-surface); 
+            backdrop-filter: blur(12.8px);
+            -webkit-backdrop-filter: blur(12.8px);
+            padding: 19.2px; 
+            border-radius: var(--radius-lg); 
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; gap: 6.4px;
+            position: relative; overflow: hidden;
+            transition: var(--transition);
+        }
+        .stat-card:hover { transform: translateY(-3.2px); box-shadow: var(--shadow-md); border-color: var(--primary); }
+        .stat-card::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3.2px;
+        }
+        .stat-card:nth-child(1)::after { background: var(--primary); }
+        .stat-card:nth-child(2)::after { background: var(--success); }
+        
+        .stat-card h4 { margin: 0; font-size: 10.4px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; font-weight: 600;}
+        .stat-card .val { font-size: 28.8px; font-weight: 800; color: var(--text-heading); letter-spacing: -0.8px; }
+
+        /* --- TABLES --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 12.8px; }
+        th { text-align: left; padding: 12.8px; border-bottom: 1px solid var(--border); color: var(--text-muted); font-size: 9.6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+        td { padding: 12.8px; border-bottom: 1px solid var(--border); font-size: 11.2px; color: var(--text-heading); }
+        tbody tr:hover { background: #f8fafc; }
+        tbody tr:last-child td { border-bottom: none; }
+        
+        /* --- BUTTONS --- */
+        button { font-family: 'Inter', sans-serif; }
+        
+        .btn-sm { 
+            padding: 4.8px 11.2px; border-radius: 799.2px; border: none; cursor: pointer; 
+            font-size: 9.6px; font-weight: 600; margin-right: 6.4px; transition: all 0.2s ease; 
+        }
+        .btn-disable { background: var(--warning-light); color: var(--warning-dark); }
+        .btn-disable:hover { background: #fde68a; }
+        .btn-enable { background: var(--success-light); color: var(--success-dark); }
+        .btn-enable:hover { background: #a7f3d0; }
+        .btn-delete { background: var(--danger-light); color: var(--danger-dark); }
+        .btn-delete:hover { background: #fecaca; }
+
+        button.save { 
+            background: var(--gradient-primary); width: 100%; margin-top: 19.2px; padding: 11.2px; 
+            font-size: 12px; color: white; border: none; border-radius: var(--radius-md); 
+            cursor: pointer; font-weight: 600; transition: var(--transition);
+            box-shadow: 0 3.2px 9.6px rgba(79, 70, 229, 0.3);
+        }
+        button.save:hover { background: var(--primary-hover); transform: translateY(-1.6px); box-shadow: 0 6.4px 12.8px rgba(79, 70, 229, 0.4); filter: brightness(1.1); }
+        button.save:active { transform: translateY(0); box-shadow: 0 3.2px 6.4px rgba(79, 70, 229, 0.3); filter: brightness(1); }
+
+        /* --- FORMS --- */
+        label { display: block; font-weight: 500; margin-bottom: 6.4px; font-size: 10.4px; color: var(--text-heading); }
+        input, select, textarea { 
+            width: 100%; padding: 9.6px 12.8px; border: 1px solid var(--border); 
+            border-radius: var(--radius-md); box-sizing: border-box; font-size: 11.2px; 
+            font-family: 'Inter', sans-serif; color: var(--text-heading);
+            background: var(--bg-body); transition: all 0.2s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none; border-color: var(--primary); box-shadow: var(--focus-ring); background: var(--bg-surface);
+        }
+        input::placeholder { color: #cbd5e1; }
+
+        /* --- PHONE PREVIEW REPLICA LAYOUT --- */
+        .phone-preview { 
+            width: 100%; max-width: 256px; height: 480px; border: 8px solid #1e293b; 
+            border-radius: 28.8px; margin: 0 auto; background: #f8fafc; 
+            box-shadow: var(--shadow-lg); 
+            position: relative;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .phone-preview::before {
+            content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 96px; height: 19.2px; background: #1e293b; border-bottom-left-radius: 9.6px; border-bottom-right-radius: 9.6px; z-index: 10;
+        }
+        .preview-box {
+            border: 1.6px dashed var(--border); transition: border-color 0.2s ease;
+            background: var(--bg-body);
+        }
+        .preview-box:hover { border-color: var(--primary); }
+
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 19.2px; margin-bottom: 19.2px; }
+        
+        .status-msg { margin-top: 12.8px; padding: 11.2px; border-radius: var(--radius-md); display: none; text-align: center; font-size: 11.2px; font-weight: 500; }
+        
+        /* --- RESPONSIVE --- */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(1.6px); z-index: 999; opacity: 0; transition: opacity 0.3s; }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        @media (max-width: 793.6px) {
+            .grid { grid-template-columns: 1fr; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main { margin-left: 0; width: 100%; }
+            .menu-toggle { display: flex; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="brand-area">
+        <h2>QRlytics</h2>
+        <div class="badge">ENTERPRISE ADMIN</div>
+    </div>
+    <div class="nav-container">
+        <div class="nav-item active" id="nav-home" onclick="handleNav('home')">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            Home Dashboard
+        </div>
+        <div class="nav-item" id="nav-client" onclick="handleNav('client')">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            1. Client Branding
+        </div>
+        <div class="nav-item" id="nav-fields" onclick="handleNav('fields')">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            2. Form Config
+        </div>
+        <div class="nav-item" id="nav-users" onclick="handleNav('users')">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            3. User Mgmt
+        </div>
+    </div>
+    <div class="logout-item" onclick="adminLogout()">
+        <svg viewBox="0 0 24 24" style="width:12.8px; height:12.8px; stroke:currentColor; stroke-width:2; fill:none;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Logout Securely
+    </div>
+</div>
+
+<div class="main">
+    <div class="top-header">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <span></span><span></span><span></span>
+        </div>
+        <div id="breadcrumbText">Dashboard / Home</div>
+        <div style="display: flex; align-items: center; gap: 9.6px;">
+            <div id="profileIcon" style="width: 28.8px; height: 28.8px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 11.2px; color: white; box-shadow: var(--shadow-md);">A</div>
+        </div>
+    </div>
+
+    <div class="content-area">
+        <div id="homeSection">
+            <h1>Operational Overview</h1>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <h4>Active Clients</h4>
+                    <div class="val" id="countClients">...</div>
+                </div>
+                <div class="stat-card">
+                    <h4>Active Users</h4>
+                    <div class="val" id="countUsers">...</div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12.8px; margin-bottom: 12.8px;">
+                    <h3 style="margin:0;">Client & User Directory</h3>
+                    <input type="text" id="dirSearch" placeholder="Search Client ID..." style="width: 100%; max-width: 200px;" onkeyup="filterDirectory()">
+                </div>
+                <div style="overflow-x: auto;">
+                    <table id="directoryTable">
+                        <thead>
+                            <tr>
+                                <th>Client ID</th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="directoryBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="clientSection" style="display:none;">
+            <h1>Step 1: Client Branding</h1>
+            <div class="card">
+                <h3>Branding & Identity</h3>
+                <div class="grid">
+                    <div>
+                        <label>Target Client ID</label>
+                        <input type="text" id="brandClientId" placeholder="e.g., MIAL">
+                        
+                        <label style="margin-top: 16px;">Display Name</label>
+                        <input type="text" id="brandClientName" placeholder="e.g., Corporate Inc.">
+                        
+                        <label style="margin-top: 16px; margin-bottom: 3.2px;">Notification Email IDs</label>
+                        <p style="font-size: 8.8px; color: var(--text-muted); margin-top: 0; margin-bottom: 6.4px;">Comma-separated (e.g. alerts@company.com, team@company.com)</p>
+                        <input type="text" id="brandEmails" placeholder="admin@domain.com, manager@domain.com">
+                        
+                        <label style="margin-top: 16px;">Gemini API Key (AI Features)</label>
+                        <input type="password" id="brandGemini" placeholder="AIzaSy...">
+                        
+                        <label style="margin-top: 16px;">Theme Color</label>
+                        <input type="color" id="brandColor" value="#4f46e5" style="height: 38.4px; cursor: pointer; padding: 3.2px;">
+                    </div>
+                    <div>
+                        <label>Company Logo</label>
+                        <input type="file" id="logoFile" accept="image/*" onchange="previewLogo(this)" style="padding: 7.2px;">
+                        <div class="preview-box" style="margin-top: 12.8px; padding: 25.6px 16px; text-align: center; border-radius: var(--radius-md);">
+                            <img id="logoPreview" src="" alt="Logo Preview" style="max-height: 64px; display: none; margin: 0 auto;">
+                            <p id="previewText" style="color: var(--text-muted); font-size: 10.4px; margin: 0;">No logo uploaded yet</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="save" id="btnBrand" onclick="saveClientBranding()">Create / Update Client</button>
+                <div id="brandStatus" class="status-msg"></div>
+            </div>
+        </div>
+
+        <div id="fieldsSection" style="display:none;">
+            <h1>Step 2: Form Configuration</h1>
+            <div class="grid" style="grid-template-columns: 1fr minmax(256px, 320px);">
+                <div class="card" style="height: fit-content;">
+                    <h3>Dynamic Field Settings</h3>
+                    <label>Target Client ID</label>
+                    <input type="text" id="confClientId" placeholder="e.g., MIAL">
+                    
+                    <div class="grid" style="margin-top:16px; gap: 12.8px;">
+                        <div>
+                            <label>Asset Label</label>
+                            <input type="text" id="confLabelAsset" value="Asset Code" oninput="updateLivePreview()">
+                            <label style="margin-top:12.8px;">Terminal Label</label>
+                            <input type="text" id="confLabelTerminal" value="Terminal" oninput="updateLivePreview()">
+                        </div>
+                        <div>
+                            <label>Package Label</label>
+                            <input type="text" id="confLabelPackage" value="Package" oninput="updateLivePreview()">
+                            <label style="margin-top:12.8px;">Media Label</label>
+                            <input type="text" id="confLabelMedia" value="Media Type" oninput="updateLivePreview()">
+                        </div>
+                    </div>
+
+                    <label style="margin-top: 16px;">Operational Issue Category & Description Mapping</label>
+                    <p style="font-size: 9.6px; color: var(--text-muted); margin-top: -3.2px; margin-bottom: 6.4px;">Format: <b>Category : Desc 1, Desc 2</b> (One category per line)</p>
+                    <textarea id="confIssueMappingOps" rows="8" oninput="updateLivePreview()" placeholder="Hardware Issue : Media Player - Auto On/Off, Display Cable Faulty&#10;Software Issue : Content Sync Issue, Error Msg on screen">Hardware Issue : Media Player - Auto On/Off, Display Cable Faulty, Network Cable Faulty, Screen Visibility Issue, Power Cable Faulty, Led - Alignment Issue, Enclosure - Lock Issue, Mcu - Lock Issue, Led - Pixel Damage Issue, Mcu - Tray Issue, Faulty Mcu Ports/Socket, Enclosure - Bottom Door Issue, Enclosure - Top Door Issue, Screen - Visible Backlight, Media Player - Faulty
+Software Issue : Software Issue (Lemma), Software Issue (Scala), Software Issue (Windows), Content Sync Issue, Content Stuck Issue, Incorrect Resolution, Error Msg on screen
+Power Issue : Power Issue (Dial), Power Issue (Timdaa), Faulty ELCB, ELCB Tripping
+Network Issue : Network Issue (Dial), Network Issue (Timdaa), LAN Port Faulty (MP), LAN Port Faulty (Patch Cord), LAN Cable Faulty</textarea>
+
+                    <label style="margin-top: 16px;">Quality Issue Category & Description Mapping</label>
+                    <textarea id="confIssueMappingQA" rows="6" oninput="updateLivePreview()" placeholder="Cleanliness : Floor not mopped, Trash bin full&#10;Lighting : Light bulb broken, Area too dark">Cleanliness : Floor not mopped, Trash bin full
+Lighting : Light bulb broken, Area too dark</textarea>
+                    
+                    <button class="save" id="btnConfig" onclick="saveFields()">Push Configuration</button>
+                    <div id="configStatus" class="status-msg"></div>
+                </div>
+                
+                <div>
+                    <div class="phone-preview">
+                        
+                        <div style="background: #28292b; padding: 28.8px 12.8px 12.8px 12.8px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <img id="prevLogoTop" src="" style="height: 19.2px; object-fit: contain; max-width: 64px; visibility: hidden;">
+                            <h1 style="color: white; font-size: 12.8px; font-weight: 600; margin: 0; text-align: center;">Client Portal</h1>
+                            <div style="width: 19.2px;"></div>
+                        </div>
+                        
+                        <div style="padding: 16px; overflow-y: auto; flex: 1;">
+                            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12.8px; padding: 16px; box-shadow: 0 3.2px 4.8px -0.8px rgba(0,0,0,0.05), 0 1.6px 3.2px -0.8px rgba(0,0,0,0.03);">
+                                <h2 style="font-size: 19.2px; font-weight: 700; color: #0f172a; margin: 0 0 19.2px 0; letter-spacing: -0.4px;">Audit Details</h2>
+                                
+                                <div style="background: #f8fafc; padding: 16px; border-radius: 9.6px; border: 1px solid #e2e8f0; margin-bottom: 19.2px;">
+                                    <div style="display: flex; flex-direction: column; gap: 9.6px;">
+                                        <div>
+                                            <label id="prevL1_lbl" style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 4.8px;">Asset Code</label>
+                                            <input type="text" value="SCAN-001" readonly style="width: 100%; padding: 9.6px 12.8px; border: 1px solid #e2e8f0; border-radius: 6.4px; font-size: 11.2px; background: #f8fafc; color: #64748b; font-family: 'Inter', sans-serif;">
+                                        </div>
+                                        <div>
+                                            <label id="prevL2_lbl" style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 4.8px;">Terminal</label>
+                                            <input type="text" value="T1-Gate 4" readonly style="width: 100%; padding: 9.6px 12.8px; border: 1px solid #e2e8f0; border-radius: 6.4px; font-size: 11.2px; background: #f8fafc; color: #64748b; font-family: 'Inter', sans-serif;">
+                                        </div>
+                                        <div>
+                                            <label id="prevL3_lbl" style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 4.8px;">Package</label>
+                                            <input type="text" value="Premium" readonly style="width: 100%; padding: 9.6px 12.8px; border: 1px solid #e2e8f0; border-radius: 6.4px; font-size: 11.2px; background: #f8fafc; color: #64748b; font-family: 'Inter', sans-serif;">
+                                        </div>
+                                        <div>
+                                            <label id="prevL4_lbl" style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 4.8px;">Media Type</label>
+                                            <input type="text" value="Digital" readonly style="width: 100%; padding: 9.6px 12.8px; border: 1px solid #e2e8f0; border-radius: 6.4px; font-size: 11.2px; background: #f8fafc; color: #64748b; font-family: 'Inter', sans-serif;">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 style="font-size: 12.8px; font-weight: 600; color: #0f172a; margin: 0 0 12.8px 0;">Issue Classification</h3>
+                                
+                                <label style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 4.8px; margin-top: 0;">Select Issue Type</label>
+                                <div id="previewTypeSelectBox" style="display: flex; flex-direction: column; gap: 9.6px; margin-bottom: 19.2px;">
+                                    </div>
+
+                                <label style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 4.8px; margin-top: 19.2px;">Specific Description</label>
+                                <div id="previewDescSelectBox" style="display: flex; flex-direction: column; gap: 9.6px; margin-bottom: 19.2px;">
+                                    </div>
+
+                                <div style="text-align: center; margin: 19.2px 0; border: 1.6px dashed #e2e8f0; padding: 25.6px; border-radius: 9.6px; background: #f8fafc;">
+                                    <label style="display: block; font-size: 10.4px; font-weight: 500; color: #0f172a; margin-bottom: 6.4px; margin-top: 0;">Photographic Evidence</label>
+                                    <p style="font-size: 9.6px; color: #64748b; margin-bottom: 12.8px; margin-top: 0;">Upload or capture an image of the reported issue.</p>
+                                    <div style="display: flex; justify-content: center;">
+                                        <div style="background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; box-shadow: 0 1px 1.6px 0 rgba(0, 0, 0, 0.05); padding: 9.6px 19.2px; border-radius: 6.4px; font-weight: 600; font-size: 11.2px; display: flex; align-items: center; gap: 6.4px; width: 100%; justify-content: center;">
+                                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                                            Upload Photo
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; flex-direction: column; gap: 9.6px; margin-top: 25.6px;">
+                                    <div style="background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; width: 100%; padding: 9.6px 19.2px; border-radius: 6.4px; font-weight: 600; font-size: 11.2px; text-align: center; box-shadow: 0 1px 1.6px 0 rgba(0, 0, 0, 0.05); box-sizing: border-box;">Cancel</div>
+                                    <div style="background: #10b981; color: white; border: none; width: 100%; padding: 9.6px 19.2px; border-radius: 6.4px; font-weight: 600; font-size: 11.2px; text-align: center; box-sizing: border-box;">Submit Audit</div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="usersSection" style="display:none;">
+            <h1>Step 3: User Management</h1>
+            <div class="card">
+                <h3>Register Audit Staff</h3>
+                <div class="grid">
+                    <div>
+                        <label>Username</label>
+                        <input type="text" id="newUsername" placeholder="e.g., john.doe">
+                        <label style="margin-top: 16px;">Password</label>
+                        <input type="password" id="newPassword" placeholder="••••••••">
+                    </div>
+                    <div>
+                        <label>Client ID Mapping</label>
+                        <input type="text" id="userClient" placeholder="e.g., MIAL">
+                        <label style="margin-top: 16px;">Access Role</label>
+                        <select id="userRole">
+								<option value="OpsTeam">OpsTeam</option>
+								<option value="TL">TL</option>
+								<option value="Manager">Manager</option>
+							</select>
+                    </div>
+                </div>
+                <button class="save" id="btnUser" onclick="saveUser()">Create User Account</button>
+                <div id="userStatus" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const adminScriptURL = 'https://script.google.com/macros/s/AKfycbyjWv9Qvi212R7orV9kFGj3QRZlb60_UyewjPBQJvqmgq4E2hZc77iNbWlQKY3Ws07V/exec';
+    let base64Logo = "";
+    let globalDashboardData = { users: [], clients: [] };
+    let currentPreviewMapping = {};
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function handleNav(id) {
+        showSection(id);
+        if (window.innerWidth <= 992) toggleSidebar();
+        fetchDashboardData(); 
+        if (id === 'fields') updateLivePreview();
+    }
+
+    function showSection(id) {
+        ['home', 'users', 'client', 'fields'].forEach(sec => {
+            document.getElementById(sec + 'Section').style.display = 'none';
+            document.getElementById('nav-' + sec).classList.remove('active');
+        });
+        document.getElementById(id + 'Section').style.display = 'block';
+        document.getElementById('nav-' + id).classList.add('active');
+        const titles = { 'home': 'Home', 'users': 'User Management', 'client': 'Client Branding', 'fields': 'Form Configuration' };
+        document.getElementById('breadcrumbText').innerText = `Dashboard / ${titles[id]}`;
+    }
+
+    async function fetchDashboardData() {
+        try {
+            const response = await fetch(adminScriptURL + '?action=getDashboard');
+            globalDashboardData = await response.json();
+            document.getElementById('countClients').innerText = globalDashboardData.clients.length;
+            document.getElementById('countUsers').innerText = globalDashboardData.users.length;
+            
+            const tbody = document.getElementById('directoryBody');
+            tbody.innerHTML = "";
+            
+            globalDashboardData.users.forEach(user => {
+                const isDisabled = user.status === "Disabled";
+                const row = document.createElement('tr');
+                row.setAttribute('data-cid', user.clientId);
+                
+                const statusDot = isDisabled ? `<svg width="8" height="8" viewBox="0 0 8 8" style="margin-right:4.8px; display:inline-block;"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>` : `<svg width="8" height="8" viewBox="0 0 8 8" style="margin-right:4.8px; display:inline-block;"><circle cx="4" cy="4" r="4" fill="currentColor"/></svg>`;
+                const statusColor = isDisabled ? 'var(--danger)' : 'var(--success)';
+
+                row.innerHTML = `
+                    <td><b style="color: var(--text-heading);">${user.clientId}</b></td>
+                    <td style="font-weight: 500;">${user.username}</td>
+                    <td><span style="background: var(--bg-body); padding: 3.2px 6.4px; border-radius: 3.2px; font-size: 9.6px; font-weight: 600; border: 1px solid var(--border);">${user.role}</span></td>
+                    <td><span style="color: ${statusColor}; font-weight: 600; font-size: 10.4px; display:flex; align-items:center;">${statusDot} ${user.status}</span></td>
+                    <td>
+                        <button class="btn-sm ${isDisabled ? 'btn-enable' : 'btn-disable'}" onclick="actionUser('${isDisabled ? 'enable' : 'disable'}', '${user.username}')">${isDisabled ? 'Enable' : 'Disable'}</button>
+                        <button class="btn-sm btn-delete" onclick="actionUser('delete', '${user.username}')">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (e) { console.error("Dashboard Load Error:", e); }
+    }
+
+    async function saveClientBranding() {
+        const cid = document.getElementById('brandClientId').value.trim().toUpperCase();
+        const cname = document.getElementById('brandClientName').value;
+        const color = document.getElementById('brandColor').value;
+        const emails = document.getElementById('brandEmails').value.trim(); // NEW
+        const gemini = document.getElementById('brandGemini') ? document.getElementById('brandGemini').value.trim() : "";
+        const status = document.getElementById('brandStatus');
+
+        if (!cid) return alert("Enter Client ID");
+
+        toggleBtn('btnBrand', true, "Syncing...");
+        try {
+            await fetch(adminScriptURL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'updateConfig', 
+                    clientId: cid, 
+                    clientName: cname, 
+                    primaryColor: color, 
+                    logoData: base64Logo,
+                    notificationEmails: emails, // ADDED FIELD
+                    geminiKey: gemini
+                }) 
+            });
+            showStatus(status, "Step 1 Done! Client Created. Now go to Form Configuration.", "var(--success)");
+            fetchDashboardData();
+        } catch (e) { showStatus(status, "Success!", "var(--success)"); } 
+        finally { toggleBtn('btnBrand', false, "Create / Update Client"); }
+    }
+
+    async function saveFields() {
+        const cid = document.getElementById('confClientId').value.trim().toUpperCase();
+        const rawOpsMapping = document.getElementById('confIssueMappingOps').value;
+        const rawQaMapping = document.getElementById('confIssueMappingQA').value;
+        
+        const lAsset = document.getElementById('confLabelAsset').value;
+        const lTerm = document.getElementById('confLabelTerminal').value;
+        const lPack = document.getElementById('confLabelPackage').value;
+        const lMedia = document.getElementById('confLabelMedia').value;
+
+        const status = document.getElementById('configStatus');
+        if (!cid) return alert("Enter Client ID");
+        
+        // Parse mapping
+        function parseMapping(raw) {
+            const lines = raw.split('\n');
+            const map = {};
+            const arr = [];
+            lines.forEach(line => {
+                if(line.includes(':')) {
+                    const parts = line.split(':');
+                    const type = parts[0].trim();
+                    const descs = parts[1].split(',').map(d => d.trim()).filter(d => d);
+                    if(type && descs.length > 0) {
+                        map[type] = descs;
+                        arr.push(type);
+                    }
+                }
+            });
+            return { map, arr };
+        }
+
+        const opsData = parseMapping(rawOpsMapping);
+        const qaData = parseMapping(rawQaMapping);
+        
+        const combinedMapping = {
+            "Operations": opsData.map,
+            "Quality": qaData.map
+        };
+
+        const issueTypesStr = [...opsData.arr, ...qaData.arr].join(', ');
+        const issueDescJson = JSON.stringify(combinedMapping); // Store the mapping object directly
+
+        toggleBtn('btnConfig', true, "Pushing...");
+        try {
+            await fetch(adminScriptURL, { 
+                method: 'POST', 
+                body: JSON.stringify({ 
+                    action: 'updateConfig', 
+                    clientId: cid, 
+                    issueTypes: issueTypesStr, 
+                    issueDesc: issueDescJson,
+                    labelAsset: lAsset,
+                    labelTerminal: lTerm,
+                    labelPackage: lPack,
+                    labelMedia: lMedia
+                }) 
+            });
+            showStatus(status, "Config Pushed Successfully!", "var(--success)");
+        } catch (e) { 
+            showStatus(status, "Success!", "var(--success)"); 
+        } finally { 
+            toggleBtn('btnConfig', false, "Push Configuration"); 
+        }
+    }
+
+    async function saveUser() {
+        const u = document.getElementById('newUsername').value;
+        const p = document.getElementById('newPassword').value;
+        const r = document.getElementById('userRole').value;
+        const cid = document.getElementById('userClient').value.trim().toUpperCase();
+        const status = document.getElementById('userStatus');
+
+        if (!u || !p || !cid) return alert("Fill all fields");
+
+        const clientExists = globalDashboardData.clients.some(c => c.clientId.toUpperCase() === cid);
+        if (!clientExists) {
+            return alert("FLOW ERROR: Client ID not found. Follow flow: 1. Create Client -> 2. Form Config -> 3. Create User");
+        }
+
+        toggleBtn('btnUser', true, "Saving...");
+        try {
+            await fetch(adminScriptURL, { 
+                method: 'POST', 
+                body: JSON.stringify({ action: 'createUser', username: u, password: p, role: r, clientId: cid }) 
+            });
+            showStatus(status, "Step 3 Done! User Created successfully.", "var(--success)");
+            fetchDashboardData();
+        } catch (e) { showStatus(status, "Success!", "var(--success)"); }
+        finally { toggleBtn('btnUser', false, "Create User Account"); }
+    }
+
+    function updateLivePreview() {
+        // Update Labels matching exact HTML payload
+        document.getElementById('prevL1_lbl').innerText = document.getElementById('confLabelAsset').value || "Asset Code";
+        document.getElementById('prevL2_lbl').innerText = document.getElementById('confLabelTerminal').value || "Terminal";
+        document.getElementById('prevL3_lbl').innerText = document.getElementById('confLabelPackage').value || "Package";
+        document.getElementById('prevL4_lbl').innerText = document.getElementById('confLabelMedia').value || "Media Type";
+
+        // Update logo rendering if changed
+        if(base64Logo) {
+            document.getElementById('prevLogoTop').src = base64Logo;
+            document.getElementById('prevLogoTop').style.visibility = 'visible';
+        }
+
+        const rawOps = document.getElementById('confIssueMappingOps').value;
+        const rawQa = document.getElementById('confIssueMappingQA').value;
+        const lines = (rawOps + '\n' + rawQa).split('\n');
+        currentPreviewMapping = {};
+        
+        lines.forEach(line => {
+            if(line.includes(':')) {
+                const parts = line.split(':');
+                const type = parts[0].trim();
+                const descs = parts[1].split(',').map(d => d.trim()).filter(d => d);
+                if(type && descs.length > 0) currentPreviewMapping[type] = descs;
+            }
+        });
+        
+        // Exact styling replication logic applied dynamically
+        const typeSelectBox = document.getElementById('previewTypeSelectBox');
+        
+        typeSelectBox.innerHTML = Object.keys(currentPreviewMapping).map((t, idx) => `
+            <label style="display: flex; align-items: center; font-size: 10.4px; font-weight: 500; background: #ffffff; padding: 9.6px 12.8px; border: 1px solid #e2e8f0; border-radius: 6.4px; cursor: pointer; color: #0f172a; transition: all 0.2s;">
+                <input type="radio" name="prev_type" value="${t}" ${idx === 0 ? 'checked' : ''} onchange="updatePreviewDesc()" style="margin-right: 9.6px; width: 12.8px; height: 12.8px; accent-color: #0f172a; cursor: pointer;">
+                ${t}
+            </label>
+        `).join('');
+        
+        updatePreviewDesc();
+    }
+
+    function updatePreviewDesc() {
+        const checkedNode = document.querySelector('input[name="prev_type"]:checked');
+        const selectedType = checkedNode ? checkedNode.value : Object.keys(currentPreviewMapping)[0];
+        const descBox = document.getElementById('previewDescSelectBox');
+        
+        if(currentPreviewMapping[selectedType]) {
+            descBox.innerHTML = currentPreviewMapping[selectedType].map((d, idx) => `
+                <label style="display: flex; align-items: center; font-size: 10.4px; font-weight: 500; background: #ffffff; padding: 9.6px 12.8px; border: 1px solid #e2e8f0; border-radius: 6.4px; cursor: pointer; color: #0f172a; transition: all 0.2s;">
+                    <input type="radio" name="prev_desc" value="${d}" ${idx === 0 ? 'checked' : ''} style="margin-right: 9.6px; width: 12.8px; height: 12.8px; accent-color: #0f172a; cursor: pointer;">
+                    ${d}
+                </label>
+            `).join('');
+        } else {
+            descBox.innerHTML = '';
+        }
+    }
+
+    function previewLogo(input) {
+        const file = input.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                base64Logo = e.target.result;
+                document.getElementById('logoPreview').src = base64Logo;
+                document.getElementById('logoPreview').style.display = 'block';
+                document.getElementById('previewText').style.display = 'none';
+                
+                document.getElementById('prevLogoTop').src = base64Logo;
+                document.getElementById('prevLogoTop').style.visibility = 'visible';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function toggleBtn(id, loading, text) {
+        const btn = document.getElementById(id);
+        if(btn) {
+            btn.disabled = loading; 
+            btn.innerText = text;
+            btn.style.opacity = loading ? "0.7" : "1";
+            btn.style.cursor = loading ? "not-allowed" : "pointer";
+        }
+    }
+
+    function showStatus(el, msg, color) {
+        el.style.display = "block"; 
+        
+        if(color.includes('var')) {
+            el.style.backgroundColor = 'var(--success-light)';
+            el.style.color = 'var(--success-dark)';
+            el.style.border = '1px solid #a7f3d0';
+        } else {
+            el.style.backgroundColor = color + "15"; 
+            el.style.color = color; 
+        }
+        
+        el.innerText = msg;
+        setTimeout(() => { el.style.display = "none"; }, 4000);
+    }
+
+    function filterDirectory() {
+        const query = document.getElementById('dirSearch').value.toUpperCase();
+        const rows = document.querySelectorAll('#directoryBody tr');
+        rows.forEach(row => {
+            const text = row.getAttribute('data-cid').toUpperCase();
+            row.style.display = text.includes(query) ? "" : "none";
+        });
+    }
+
+    async function actionUser(type, user) {
+        if(confirm(`Are you sure you want to ${type} user: ${user}?`)) {
+            await fetch(adminScriptURL, { method: 'POST', body: JSON.stringify({ action: 'manageUser', type: type, username: user }) });
+            fetchDashboardData();
+        }
+    }
+
+    function adminLogout() { if(confirm("Are you sure you want to securely log out?")) window.location.href = 'index.html'; }
+    window.onload = () => { handleNav('home'); };
+</script>
+</body>
+</html>

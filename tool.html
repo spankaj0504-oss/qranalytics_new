@@ -1,0 +1,2714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>QRAnalytics | Enterprise Audit</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- PREMIUM DESIGN SYSTEM --- */
+        :root { 
+            --brand-primary: #0056D2; 
+            --brand-primary-hover: #0044a8;
+            --surface: rgba(255, 255, 255, 0.95);
+            --background: #F8F9FA; 
+            --text-main: #111827; 
+            --text-muted: #6b7280; 
+            --border-color: rgba(209, 213, 219, 0.6); 
+            
+            --success-green: #10b981; 
+            --danger-red: #ef4444;
+            --warning-orange: #f59e0b;
+            --accent-orange: #f59e0b; 
+            
+            --primary-blue: #0056D2; 
+            --gradient-primary: linear-gradient(135deg, #0056D2, #0044a8);
+            
+            --radius-sm: 6.4px;
+            --radius-md: 9.6px;
+            --radius-lg: 12.8px;
+            --radius-xl: 19.2px;
+            
+            --shadow-sm: 0 3.2px 4.8px -0.8px rgba(0, 0, 0, 0.05), 0 1.6px 3.2px -0.8px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 8px 12px -2.4px rgba(0, 0, 0, 0.08), 0 3.2px 4.8px -1.6px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 16px 20px -4px rgba(0, 0, 0, 0.1), 0 8px 8px -4px rgba(0, 0, 0, 0.04);
+            --shadow-focus: 0 0 0 3.2px rgba(0, 86, 210, 0.2);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --header-height: calc(56px + env(safe-area-inset-top, 0px));
+        }
+        
+        /* Issue Age Dual Slider */
+        .dual-slider-container { position: relative; height: 24px; margin-top: 4px; }
+        .dual-slider-track { position: absolute; top: 10.4px; left: 0; right: 0; height: 3.2px; background: #e2e8f0; border-radius: 1.6px; }
+        .dual-slider-fill { position: absolute; top: 10.4px; left: 0; right: 0; height: 3.2px; background: var(--brand-primary); border-radius: 1.6px; }
+        .dual-slider-input { position: absolute; top: 4px; left: 0; width: 100%; -webkit-appearance: none; appearance: none; background: transparent; pointer-events: none; margin: 0; padding: 0 !important; border: none !important; box-shadow: none !important; height: 16px !important; outline: none !important; }
+        .dual-slider-input::-webkit-slider-thumb { pointer-events: auto; -webkit-appearance: none; appearance: none; width: 14.4px; height: 14.4px; border-radius: 50%; background: var(--brand-primary); border: 1.6px solid white; box-shadow: var(--shadow-sm); cursor: pointer; position: relative; z-index: 10; }
+        .dual-slider-input::-moz-range-thumb { pointer-events: auto; width: 14.4px; height: 14.4px; border-radius: 50%; background: var(--brand-primary); border: 1.6px solid white; box-shadow: var(--shadow-sm); cursor: pointer; position: relative; z-index: 10; }
+
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(12.8px);
+            -webkit-backdrop-filter: blur(12.8px);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .hidden { display: none !important; }
+        
+        body { 
+            background: var(--background); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+                        margin: 0; 
+            padding: 0; 
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 6.4px; height: 6.4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        #loginLoader {
+            border: 2.4px solid var(--border-color);
+            border-top: 2.4px solid var(--brand-primary);
+            border-radius: 50%;
+            width: 19.2px;
+            height: 19.2px;
+            animation: spin 0.8s linear infinite;
+            margin: 12px auto;
+            display: none;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .split-wrapper { display: flex; flex: 1; min-height: 0; overflow: hidden; position: relative; }
+        .side-content { flex: 1; overflow-y: auto; padding: 25.6px; position: relative; }
+
+        .brand-header-row {
+            background: #ffffff !important; 
+            display: grid;
+            grid-template-columns: 38.4px 1fr 38.4px;
+            align-items: center;
+            padding: env(safe-area-inset-top, 0px) 25.6px 0 0;
+            height: var(--header-height);
+            box-sizing: border-box;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 1001;
+            box-shadow: var(--shadow-sm);
+        }
+        .brand-header-row img { height: 25.6px; object-fit: contain; }
+        .brand-header-row h1 { margin: 0; font-size: 12.8px; font-weight: 600; text-align: center; color: #ffffff;}
+
+
+        .mobile-menu-btn { display: flex; align-items: center; justify-content: center; background: transparent; border: none; padding: 0; cursor: pointer; margin: 0; }
+        .mobile-only { display: none !important; }
+        @media (max-width: 680px) {
+            .mobile-only { display: flex !important; }
+        }
+        .mobile-overlay { display: none; }
+
+        .sidebar {
+            flex: 0 0 208px;
+            background: rgba(15, 23, 42, 0.8) !important; 
+            backdrop-filter: blur(12.8px);
+            -webkit-backdrop-filter: blur(12.8px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            z-index: 10;
+            box-shadow: 3.2px 0 20px rgba(0,0,0,0.15);
+            overflow: hidden;
+            white-space: nowrap;
+        }
+        .sidebar.collapsed { flex: 0 0 0px !important; width: 0 !important; min-width: 0 !important; opacity: 0; }
+        body:has(#mainSidebar.collapsed) #topHeader .mobile-only { display: flex !important; }
+        body:has(#mainSidebar.collapsed) .global-footer { display: none !important; }
+
+        .sidebar-header {
+            padding: 25.6px 19.2px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header img { width: 96px; max-width: 100%; margin-bottom: 12.8px; }
+        .sidebar-header h3 { margin: 0; color: white; font-size: 11.2px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
+        .sidebar-menu { padding: 19.2px 9.6px; display: flex; flex-direction: column; gap: 3.2px; }
+        
+        .menu-item {
+            padding: 9.6px 12.8px;
+            color: #ffffff; 
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 11.2px;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 9.6px;
+            border-left: 3.2px solid transparent;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.1); color: var(--accent-orange); }
+        .menu-item.active { background: rgba(255,255,255,0.1); color: var(--accent-orange); border-left: 3.2px solid var(--accent-orange); font-weight: 600; }
+
+        .side-hero {
+            flex: 0 0 40%;
+            background: #ffffff !important; 
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 32px;
+            color: white;
+            text-align: center;
+            z-index: 5;
+        }
+
+        .side-hero img { width: 80%; max-width: 176px; margin-bottom: 25.6px; }
+
+        /* Login Layout Redesign - Light Theme with Book Opening Animation */
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) {
+            background: radial-gradient(circle at 50% 50%, #cbd5e1 0%, #94a3b8 100%) !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+        #masterSplitWrapper:has(#loginSection:not(.hidden))::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(79, 70, 229, 0.05) 1px, transparent 1px);
+            background-size: 32px 32px; background-position: center center; z-index: 0;
+        }
+        #masterSplitWrapper:has(#loginSection:not(.hidden))::after {
+            content: ''; position: absolute; width: 480px; height: 480px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, transparent 70%);
+            top: -160px; left: -160px; z-index: 0;
+        }
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) #mobileOverlay {
+            display: none !important;
+        }
+
+        @keyframes flipOpenTop {
+            0% { transform: perspective(1200px) rotateX(90deg); opacity: 0; }
+            100% { transform: perspective(1200px) rotateX(0deg); opacity: 1; }
+        }
+        
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2), inset 0 10px 20px rgba(0,0,0,0.05), inset 0 2px 10px rgba(255,255,255,1);
+            border-radius: 9.6px;
+            padding: 0; display: flex; flex-direction: column; justify-content: center; z-index: 2;
+            transform-origin: top center;
+            animation: flipOpenTop 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            box-sizing: border-box !important;
+            margin: auto; /* Ensure perfectly middle-aligned on mobile */
+        }
+
+        @keyframes bookOpenLeft {
+            0% { transform: rotateY(90deg); opacity: 0; }
+            100% { transform: rotateY(0deg); opacity: 1; }
+        }
+        @keyframes bookOpenRight {
+            0% { transform: rotateY(-90deg); opacity: 0; }
+            100% { transform: rotateY(0deg); opacity: 1; }
+        }
+
+        @media (min-width: 680.8px) {
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-hero {
+                flex: 0 0 336px;
+                height: 416px;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(241, 245, 249, 0.95)) !important;
+                backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+                border: 1px solid rgba(255, 255, 255, 0.9);
+                border-right: none;
+                box-shadow: -20px 30px 60px rgba(0, 0, 0, 0.2), inset -10px 0 20px rgba(0,0,0,0.05), inset 2px 2px 10px rgba(255, 255, 255, 0.8);
+                border-radius: 9.6px 0 0 9.6px;
+                padding: 48px 32px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                z-index: 2;
+                transform-origin: right center;
+                animation: bookOpenLeft 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                box-sizing: border-box !important;
+                margin: auto 0;
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
+                flex: 0 0 336px;
+                height: 416px;
+                background: rgba(255, 255, 255, 0.98) !important;
+                border: 1px solid rgba(255, 255, 255, 0.9);
+                border-radius: 0 9.6px 9.6px 0;
+                border-left: 1px solid rgba(203, 213, 225, 0.6); /* Darker hinge line */
+                box-shadow: 20px 30px 60px rgba(0, 0, 0, 0.2), inset 10px 0 20px rgba(0,0,0,0.05), inset -2px 2px 10px rgba(255, 255, 255, 0.8);
+                transform-origin: left center;
+                animation: bookOpenRight 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+                box-sizing: border-box !important;
+                margin: auto 0;
+            }
+        }
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) #loginSection {
+            margin-top: 0;
+            padding: 40px 32px;
+            background: transparent;
+            box-shadow: none;
+            border: none;
+            width: 100%;
+            height: auto;
+            box-sizing: border-box !important;
+        }
+
+        /* Mobile Splash Screen */
+        .mobile-splash {
+            display: none;
+        }
+        @media (max-width: 680px) {
+            .mobile-splash {
+                display: flex;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background-color: #0A66C2; /* Blue */
+                z-index: 99999;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                transition: opacity 0.5s ease;
+            }
+            .mobile-splash h1 {
+                color: #ffffff;
+                font-size: 32px;
+                font-weight: 700;
+                margin: 0;
+                font-family: 'Plus Jakarta Sans', sans-serif;
+            }
+        }
+
+        .enterprise-badge {
+            display: inline-block;
+            background: rgba(79, 70, 229, 0.1);
+            border: 1px solid var(--primary-blue);
+            color: var(--primary-blue);
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: none;
+            box-shadow: 0 0 8px rgba(79, 70, 229, 0.1);
+            font-size: 8.8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 4.8px 12.8px;
+            border-radius: 3.2px;
+            margin-bottom: 19.2px;
+            align-self: flex-start;
+        }
+
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) #heroTitle {
+            color: #000000 !important;
+            text-shadow: none;
+            letter-spacing: 1.6px;
+            -webkit-text-fill-color: #000000 !important;
+        }
+
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) p,
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) #heroSub {
+            color: #000000 !important;
+        }
+        
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) input {
+            background: #ffffff !important;
+            border: 1px solid var(--border-color) !important;
+            color: #000000 !important;
+            border-radius: 6.4px !important;
+            transition: all 0.3s ease;
+        }
+
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) input:focus {
+            border-color: var(--brand-primary) !important;
+            box-shadow: 0 0 0 3.2px rgba(79, 70, 229, 0.1) !important;
+            outline: none;
+        }
+
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) input::placeholder {
+            color: var(--text-muted) !important;
+        }
+        
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) #loginBtn {
+            background: var(--brand-primary) !important;
+            color: #ffffff !important;
+            border-radius: 6.4px !important;
+            text-shadow: none;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+            border: none;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+        }
+
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) #loginBtn:hover {
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+            transform: translateY(-0.8px);
+            background: var(--primary-blue) !important;
+        }
+        
+        #masterSplitWrapper:has(#loginSection:not(.hidden)) button[type="button"] {
+            color: #475569 !important;
+        }
+
+        #loginSection {
+            margin-top: 10vh;
+            max-width: 336px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius-xl);
+            box-shadow: 0 20px 40px -9.6px rgba(0, 0, 0, 0.15);
+            padding: 38.4px;
+            animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .portal-card {
+            background: rgba(226, 232, 240, 0.7);
+            backdrop-filter: blur(12.8px);
+            -webkit-backdrop-filter: blur(12.8px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: var(--radius-xl);
+            padding: 25.6px 19.2px;
+            width: 208px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .portal-card:hover { transform: translateY(-6.4px); box-shadow: var(--shadow-lg); border-color: var(--brand-primary); }
+        .portal-icon { width: 57.6px; height: 57.6px; border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-bottom: 19.2px; box-shadow: var(--shadow-sm); }
+        .portal-card h3 { font-size: 17.6px; margin: 0 0 9.6px 0; color: var(--text-main); font-weight: 700; letter-spacing:-0.4px;}
+        .portal-card p { font-size: 11.2px; color: var(--text-muted); margin: 0; line-height: 1.6; }
+
+        .mobile-login-logo { display: none; }
+
+        .container { 
+            width: 100%; 
+            max-width: 880px; 
+            padding: 32px; 
+            border-radius: var(--radius-xl); 
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(9.6px);
+            -webkit-backdrop-filter: blur(9.6px);
+            box-shadow: var(--shadow-md); 
+            margin: 0 auto 25.6px auto; 
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+        }
+
+        h2 { font-size: 19.2px; font-weight: 700; color: var(--text-main); margin: 0 0 19.2px 0; letter-spacing: -0.4px; }
+        h3 { font-size: 12.8px; font-weight: 600; color: var(--text-main); margin: 0 0 12.8px 0; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        label { display: block; font-weight: 500; margin-bottom: 4.8px; color: var(--text-main); font-size: 10.4px; }
+        
+        input[type="text"], input[type="password"], select { 
+            width: 100%; 
+            padding: 9.6px 12.8px; 
+            border: 1px solid var(--border-color); 
+            border-radius: var(--radius-md); 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 11.2px;
+            color: var(--text-main);
+            background: var(--surface);
+            transition: var(--transition);
+        }
+        input:focus, select:focus { 
+            border-color: var(--primary-blue); 
+            outline: none; 
+            box-shadow: 0 0 0 2.4px rgba(15, 23, 42, 0.1); 
+        }
+        input[readonly] { background: var(--background); color: var(--text-muted); cursor: not-allowed; }
+
+        button { 
+            width: 100%; 
+            padding: 11.2px 19.2px; 
+            background: var(--gradient-primary); 
+            color: white; 
+            border: none; 
+            border-radius: var(--radius-md); 
+            font-weight: 600; 
+            cursor: pointer; 
+            font-size: 11.2px; 
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6.4px;
+            box-shadow: 0 3.2px 9.6px rgba(79, 70, 229, 0.3);
+        }
+        button:hover { transform: translateY(-1.6px); box-shadow: 0 6.4px 12.8px rgba(79, 70, 229, 0.4); filter: brightness(1.1); }
+        button:active { transform: translateY(0); box-shadow: 0 3.2px 6.4px rgba(79, 70, 229, 0.3); filter: brightness(1); }
+        
+        .btn-secondary { background: var(--surface); color: var(--text-main); border: 1px solid #cbd5e1; box-shadow: var(--shadow-sm); }
+        .btn-secondary:hover { background: #f8fafc; box-shadow: var(--shadow-md); border-color: var(--primary-blue); color: var(--primary-blue); filter:none; }
+        
+        .btn-danger { background: var(--danger-red); }
+        .btn-danger:hover { background: #dc2626; }
+        
+        .btn-success { background: var(--success-green); }
+        .btn-success:hover { background: #059669; }
+
+        .btn-reduced-70 { width: 70% !important; margin: 12.8px auto; display: block; }
+        .reduced-btn { width: auto; min-width: 160px; display: inline-flex; margin: 6.4px; }
+
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 9.6px; margin-bottom: 19.2px; }
+        .checkbox-item { 
+            display: flex; align-items: center; font-size: 10.4px; font-weight: 500;
+            background: var(--surface); padding: 9.6px 12.8px; 
+            border: 1px solid var(--border-color); border-radius: var(--radius-md); 
+            cursor: pointer; transition: var(--transition);
+        }
+        .checkbox-item:hover { border-color: var(--primary-blue); }
+        .checkbox-item input { margin-right: 9.6px; width: 12.8px; height: 12.8px; accent-color: var(--primary-blue); cursor: pointer; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12.8px; margin-bottom: 19.2px; }
+        .kpi-card { 
+            background: var(--surface); padding: 12.8px; border-radius: var(--radius-lg); 
+            border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; gap: 4.8px; position: relative; overflow: hidden;
+            transition: var(--transition);
+        }
+        .kpi-card.clickable { cursor: pointer; }
+        .kpi-card.clickable:hover { transform: translateY(-1.6px); box-shadow: var(--shadow-md); border-color: var(--brand-primary); }
+        .kpi-card.active-kpi { border: 2px solid var(--brand-primary) !important; box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1) !important; background: rgba(79, 70, 229, 0.05) !important; }
+        .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 3.2px; }
+        .kpi-card:nth-child(1)::before { background: var(--primary-blue); }
+        .kpi-card:nth-child(2)::before { background: var(--danger-red); }
+        .kpi-card:nth-child(3)::before { background: var(--success-green); }
+        .kpi-card h3 { margin: 0; font-size: 9.6px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+        .kpi-card p { margin: 0; font-size: 22.4px; font-weight: 700; color: var(--primary-blue); letter-spacing: -0.8px; }
+
+        .issue-card { 
+            background: var(--surface); padding: 16px; border-radius: var(--radius-lg); 
+            margin-bottom: 12.8px; border: 1px solid var(--border-color); 
+            box-shadow: var(--shadow-sm); transition: var(--transition);
+            display: flex; flex-direction: column; gap: 9.6px;
+        }
+        .issue-card:hover { box-shadow: var(--shadow-md); border-color: #cbd5e1; }
+        
+        .issue-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 6.4px; flex-wrap: nowrap; }
+        .issue-title-group { flex: 1; min-width: 0; }
+        .issue-title { font-size: 12px; font-weight: 600; color: var(--text-main); word-wrap: break-word; display: block;}
+        .issue-subtitle { font-size: 9.6px; color: var(--text-muted); margin-top: 3.2px; display: block;}
+        
+        .badge { 
+            padding: 3.2px 8px; border-radius: 799.2px; font-size: 8.8px; font-weight: 600; 
+            letter-spacing: 0.4px; text-transform: uppercase; display: inline-block;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .badge-open { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .badge-closed { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+        .badge-siteok { background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; }
+
+        .issue-body { font-size: 10.4px; color: var(--text-main); line-height: 1.5; }
+        .issue-meta { display: flex; gap: 12.8px; font-size: 9.6px; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 9.6px; flex-wrap: wrap;}
+        
+        .filter-row { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); 
+            gap: 9.6px; background: var(--surface); padding: 12.8px; 
+            border-radius: var(--radius-lg); margin-bottom: 19.2px; 
+            border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);
+            align-items: end; position: relative; z-index: 100;
+        }
+        .filter-row label { font-size: 9.6px; margin-bottom: 3.2px; display: block; font-weight: 600; color: var(--text-muted); }
+                .filter-row input, .filter-row select { padding: 8px 9.6px; font-size: 10.4px; height: 30.4px; }
+        .multi-select-wrapper { position: relative; width: 100%; display: block; }
+        .multi-select-box { padding: 0 9.6px; font-size: 10.4px; height: 30.4px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--surface); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; color: var(--text-color); white-space: nowrap; overflow: hidden; }
+        .multi-select-box::after { content: '▼'; font-size: 8px; margin-left: 6.4px; opacity: 0.6; flex-shrink: 0; }
+        .multi-select-dropdown { position: absolute; top: 100%; left: 0; min-width: 100%; background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); z-index: 1000; display: none; max-height: 200px; overflow-y: auto; box-shadow: var(--shadow-lg); margin-top: 3.2px; padding: 3.2px 0; }
+        .multi-select-dropdown.show { display: block; }
+        .multi-select-option { padding: 6.4px 9.6px; display: flex; align-items: center; gap: 6.4px; cursor: pointer; font-size: 10.4px; color: var(--text-color); margin: 0; white-space: nowrap; font-weight: normal; }
+        .multi-select-option:hover { background: rgba(79, 70, 229, 0.05); }
+        .multi-select-option input[type="checkbox"] { margin: 0; cursor: pointer; width: 12.8px; height: 12.8px; }
+        .active-date-range { border-color: var(--brand-primary) !important; box-shadow: var(--shadow-focus) !important; background: rgba(79, 70, 229, 0.05) !important; color: var(--brand-primary) !important; font-weight: 600; }
+        
+        .chart-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 19.2px; }
+        .chart-box { 
+            background: var(--surface); padding: 19.2px; border-radius: var(--radius-xl); 
+            border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); 
+            height: 256px; display: flex; flex-direction: column; 
+        }
+        .chart-box h4 { margin:0 0 12.8px 0; font-size:11.2px; font-weight: 600; color: var(--text-main); flex-shrink: 0;}
+        .chart-container-inner { position: relative; flex: 1; min-height: 0; width: 100%; }
+
+        .photo-link { 
+            color: var(--primary-blue); text-decoration: none; cursor: pointer; 
+            font-size: 9.6px; font-weight: 600; padding: 4.8px 9.6px; 
+            border-radius: var(--radius-sm); background: #e2e8f0; transition: var(--transition);
+            display: inline-flex; align-items: center; gap: 4.8px;
+        }
+        .photo-link:hover { background: #cbd5e1; }
+        
+        .preview-overlay { 
+            position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(15, 23, 42, 0.8); z-index:9999; 
+            display:flex; justify-content:center; align-items:center; 
+            backdrop-filter: blur(6.4px); padding: 16px; box-sizing: border-box;
+        }
+        .image-modal {
+            width: 100%; max-width: 400px; height: 200px; 
+            background: #000; border-radius: var(--radius-lg); position: relative; 
+            display: flex; justify-content: center; align-items: center; 
+            box-shadow: 0 20px 40px -9.6px rgba(0, 0, 0, 0.5); overflow: hidden;
+        }
+        .image-modal img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 0.3s ease; }
+        .modal-controls { position: absolute; top: 9.6px; right: 9.6px; display: flex; gap: 6.4px; z-index: 10; }
+        .modal-btn {
+            background: rgba(15, 23, 42, 0.7); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 4.8px 9.6px; border-radius: var(--radius-sm); cursor: pointer; font-size: 9.6px; font-weight: 500;
+            backdrop-filter: blur(3.2px); margin: 0; width: auto;
+        }
+        .modal-btn:hover { background: rgba(15, 23, 42, 0.9); transform: none; }
+
+        .camera-box { 
+            text-align: center; margin: 19.2px 0; border: 1.6px dashed var(--border-color); 
+            padding: 25.6px; border-radius: var(--radius-lg); background: var(--background); transition: var(--transition);
+        }
+        .camera-box:hover { border-color: var(--primary-blue); }
+        #cameraPreview { width: 100%; max-width: 240px; border-radius: var(--radius-md); display: none; margin: 12.8px auto 0; box-shadow: var(--shadow-md); cursor: pointer;}
+        
+        .table-container { overflow-x: auto; width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+        .dash-table { width: 100%; border-collapse: collapse; font-size: 10.4px; text-align: left; }
+        .dash-table th { background: var(--background); color: var(--text-muted); font-weight: 600; padding: 9.6px 12.8px; border-bottom: 1px solid var(--border-color); white-space: nowrap;}
+        .dash-table td { padding: 9.6px 12.8px; border-bottom: 1px solid var(--border-color); color: var(--text-main); }
+        .dash-table tr:last-child td { border-bottom: none; }
+        .dash-table tbody tr:hover { background: #f8fafc; }
+
+        .global-footer { 
+            background: #0f172a !important; 
+            color: rgba(255,255,255,0.7); 
+            text-align: center; 
+            padding: 12.8px; 
+            font-size: 9.6px; 
+            z-index: 1001; 
+        }
+
+        #reader { width: 100%; max-width: 320px; margin: 0 auto; background: var(--sidebar-bg); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);}
+        #qrBox { text-align: center; margin: 16px 0; }
+        #qrBox button { display: block; margin: 19.2px auto 0; width: 50%; }
+
+        .sub-nav-tabs { display: flex; gap: 6.4px; margin-bottom: 19.2px; background: var(--background); padding: 3.2px; border-radius: var(--radius-md); }
+        .sub-nav-btn { 
+            flex: 1; padding: 8px; margin: 0; background: transparent; color: var(--text-muted); 
+            box-shadow: none; border-radius: var(--radius-sm); font-weight: 600; 
+        }
+        .sub-nav-btn.active { background: var(--surface); color: var(--text-main); box-shadow: var(--shadow-sm); }
+        .sub-nav-btn:hover:not(.active) { background: rgba(0,0,0,0.02); box-shadow: none; transform: none;}
+
+        @media (max-width: 680px) {
+            .split-wrapper { flex-direction: column; }
+            .side-hero { display: none; }
+            
+            /* Mobile Login Redesign */
+            body:has(#loginSection:not(.hidden)) {
+                background: #f4f7fc !important;
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) {
+                background: #f4f7fc !important;
+                padding: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden))::before,
+            #masterSplitWrapper:has(#loginSection:not(.hidden))::after {
+                display: none;
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
+                animation: none;
+                transform: none;
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+                backdrop-filter: none;
+            }
+            #loginSection {
+                background: #e2e8f0 !important; /* light grey-blue card */
+                border-radius: 12px !important;
+                padding: 32px 24px !important;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+                border: none !important;
+                animation: none !important;
+                max-width: 400px;
+                margin: 0 auto !important;
+            }
+            
+            /* Hide desktop login header, show mobile one */
+            .login-header-desktop { display: none !important; }
+            .login-header-mobile { display: block !important; text-align: center; margin-bottom: 24px; }
+            .login-header-mobile h1 { color: #0056D2; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
+            .login-header-mobile p { color: #4b5563; font-size: 14px; margin: 0; }
+
+            /* Inputs */
+            .input-wrapper-mobile {
+                position: relative;
+                margin-bottom: 16px;
+            }
+            .input-wrapper-mobile svg.left-icon {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #4b5563;
+                width: 20px;
+                height: 20px;
+                z-index: 10;
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) input[type="text"],
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) input[type="password"] {
+                padding-left: 40px !important;
+                border: 1px solid #94a3b8 !important;
+                background: transparent !important;
+                border-radius: 8px !important;
+                height: 48px;
+                font-size: 14px !important;
+            }
+            
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) #loginBtn {
+                background: #cbd5e1 !important;
+                color: #64748b !important;
+                height: 48px;
+                font-size: 14px !important;
+                box-shadow: none !important;
+                border-radius: 8px !important;
+                margin-top: 8px;
+            }
+            
+            #loginSection .remember-me-container, #loginSection .footer-copyright {
+                display: none !important;
+            }
+            
+            .brand-header-row { background: #ffffff !important; padding: env(safe-area-inset-top, 0px) 12.8px 0 12.8px; grid-template-columns: 38.4px 1fr 38.4px; }
+            .brand-header-row .qrlytics-title-header { display: block; font-size: 19.2px; }
+            .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
+
+            .sidebar { 
+                position: fixed; 
+                top: 0; 
+                left: -208px; 
+                height: 100vh; 
+                width: 208px;
+                z-index: 1002; 
+                transition: left 0.3s ease; 
+                box-shadow: 3.2px 0 20px rgba(0,0,0,0.5); 
+            }
+            .sidebar.mobile-open { left: 0; }
+            .sidebar-header { display: none; }
+            .sidebar-menu { flex-direction: column; padding: 19.2px 12.8px; gap: 6.4px; overflow-y: auto;}
+            
+            .menu-item { 
+                padding: 11.2px 12.8px; 
+                border-radius: var(--radius-md); 
+                justify-content: flex-start; 
+                border-left: 3.2px solid transparent; 
+                border-bottom: none; 
+                font-size: 12px;
+            }
+            .menu-item.active { 
+                border-left: 3.2px solid var(--accent-orange); 
+                border-bottom: none; 
+                background: rgba(255,255,255,0.1);
+            }
+            
+            .mobile-overlay {
+                display: block; 
+                position: fixed; 
+                top: var(--header-height); 
+                left: 0; 
+                width: 100%; 
+                height: calc(100vh - 52px); 
+                height: calc(100dvh - var(--header-height));
+                background: rgba(15, 23, 42, 0.6); 
+                z-index: 1001; 
+                backdrop-filter: blur(1.6px);
+                opacity: 0; 
+                pointer-events: none; 
+                transition: opacity 0.3s ease;
+            }
+            .mobile-overlay.show { opacity: 1; pointer-events: auto; }
+
+            .side-content { padding: 12.8px; }
+            
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
+                flex: 1;
+                width: 100%;
+                height: auto;
+                border-radius: 12.8px;
+                max-width: 360px;
+                box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) {
+                padding: 16px;
+            }
+            
+            #loginSection { 
+                margin-top: 5vh; 
+                width: 100%; 
+                padding: 32px 19.2px; 
+                animation: none; 
+                border-radius: var(--radius-xl);
+                box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 6.4px 8px -4.8px rgba(0, 0, 0, 0.1);
+                border-top: 4px solid var(--brand-primary);
+                background: #ffffff;
+            }
+            .mobile-login-logo { display: block; margin: 0 auto 16px auto; height: 43.2px; object-fit: contain; }
+
+            .container { padding: 16px; border-radius: var(--radius-lg);}
+            .form-grid { grid-template-columns: 1fr; gap: 9.6px; }
+            .btn-reduced-70, .btn-reduced-60 { width: 100% !important; }
+            .kpi-grid { grid-template-columns: 1fr; gap: 9.6px; margin-bottom: 12.8px;}
+            
+            .filter-row { grid-template-columns: 1fr; gap: 9.6px; }
+            .filter-row > div { grid-column: span 1 !important; }
+            .filter-row input, .filter-row select { height: 35.2px; font-size: 11.2px; }
+            
+            .chart-grid { grid-template-columns: 1fr; gap: 12.8px;}
+            .chart-box { height: auto; min-height: 224px; padding: 12.8px; margin-bottom: 12.8px; }
+            .chart-box.table-box { overflow-x: auto; }
+            
+            .options-grid { grid-template-columns: 1fr; }
+            .sub-nav-tabs { flex-direction: column; }
+            
+            #portalCardsContainer { flex-direction: column; gap: 12.8px !important; align-items: center; }
+            #portalCardsContainer .portal-card {
+                width: 100%;
+                max-width: 256px;
+                padding: 32px 16px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 16px;
+                margin: 0;
+                min-height: 144px;
+                justify-content: center;
+            }
+            #portalCardsContainer .portal-icon {
+                width: 48px;
+                height: 48px;
+                margin-bottom: 0;
+                flex-shrink: 0;
+                border-radius: 12px;
+            }
+            #portalCardsContainer .portal-icon svg { width: 24px; height: 24px; }
+            #portalCardsContainer .portal-card h3 {
+                font-size: 16px;
+                margin-bottom: 4px;
+            }
+            #portalCardsContainer .portal-card p {
+                font-size: 11.2px;
+                line-height: 1.5;
+            }
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .qrlytics-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 38.4px;
+            font-weight: 900;
+            margin: 0 0 12.8px 0;
+            text-transform: uppercase;
+            letter-spacing: 3.2px;
+            background: linear-gradient(270deg, var(--brand-primary), var(--success-green), var(--brand-primary));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite;
+            text-align: center;
+        }
+        .qrlytics-title-header {
+            font-family: 'Outfit', sans-serif;
+            font-size: 38.4px;
+            font-weight: 900;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2.4px;
+            background: linear-gradient(270deg, var(--brand-primary), var(--success-green), var(--brand-primary));
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite;
+            text-align: center;
+        }
+        .workspace-header-bg {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 19.2px;
+            width: 100%;
+        }
+        .portal-center-content { padding-top: 4vh; }
+        @media (max-width: 680px) {
+            .qrlytics-title {
+                font-size: 28.8px;
+                margin: 0 0 19.2px 0;
+            }
+            .portal-center-content { padding-top: 10vh !important; }
+            .workspace-header-bg {
+                background: white;
+                padding: 24px 16px 64px 16px;
+                border-radius: 12px;
+                width: 100%;
+                max-width: 340px;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+                position: relative;
+                z-index: 1;
+            }
+            #portalCardsContainer {
+                margin-top: -42px !important;
+            }
+            .portal-header-logo { padding: 12.8px !important; }
+            .portal-header-logo .qrlytics-title { font-size: 22.4px !important; margin: 0 !important; }
+            .portal-header-logo img { height: 22.4px !important; }
+        }
+
+        .portal-header-row {
+            width: 100%; padding: 25.6px 32px; box-sizing: border-box; 
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+        }
+        .portal-signout-btn {
+            background: #ffffff !important; border: 1px solid #e2e8f0 !important; border-radius: 6.4px !important; 
+            padding: 8px 16px !important; font-size: 12.8px !important; color: #0f172a !important; cursor: pointer; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05) !important; transition: all 0.2s ease;
+            font-family: 'Outfit', sans-serif !important; font-weight: 500 !important;
+            width: auto !important; display: inline-block; text-transform: none !important;
+        }
+        .portal-signout-btn:hover { background: #f8fafc !important; transform: translateY(-1px); box-shadow: 0 6px 12px rgba(0,0,0,0.08) !important; }
+        @media (max-width: 680px) {
+            .portal-header-row { padding: 16px; grid-template-columns: auto 1fr; }
+            .portal-header-row > div:first-child { display: none; }
+            .portal-header-row > h1 { justify-self: start; font-size: 20px !important; }
+            .portal-signout-btn { padding: 6px 12px !important; font-size: 11.2px !important; }
+        }
+    </style>
+</head>
+<body>
+<div id="mobileSplash" class="mobile-splash">
+    <h1>QRAnalytics</h1>
+</div>
+<div style="display: flex; height: 100vh; overflow: hidden; width: 100vw;">
+    <aside class="sidebar hidden" id="mainSidebar">
+        <div class="sidebar-header">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                <img src="logo2.png" id="dynamicLogo1" alt="Logo" style="width: 96px; max-width: 100%; margin-bottom: 19.2px; filter: brightness(0) invert(1);">
+                <button class="mobile-menu-btn" style="color: white; border: none; background: transparent; cursor: pointer; padding: 0; margin-top: 3.2px;" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+            </div>
+            <h3 id="clientPortalName">Enterprise Solution</h3>
+        </div>
+        <nav class="sidebar-menu">
+            <a class="menu-item active" id="menuReport" onclick="switchTab('report')">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Report Audit
+            </a>
+            <a class="menu-item" id="menuClose" onclick="switchTab('close')">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+                Issues List
+            </a>
+            <a class="menu-item" id="menuDash" onclick="switchTab('dash')">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                Dashboard
+            </a>
+            <div style="flex:1;"></div>
+            <a class="menu-item" onclick="showPortalSelection()" style="margin-top:19.2px; border-top:1px solid rgba(255,255,255,0.1); border-radius:0; opacity:0.8;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                Switch Portal
+            </a>
+            <a class="menu-item" onclick="performLogout()" style="border-radius:0; opacity:0.8; color: #fca5a5;">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Sign Out
+            </a>
+        </nav>
+    </aside>
+
+    <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0;">
+        <header class="brand-header-row hidden" id="topHeader">
+            <div style="display:flex; align-items:center;">
+                <button id="mobileMenuBtn" class="mobile-menu-btn mobile-only" onclick="toggleMobileMenu()">
+                    <svg width="24" height="24" fill="none" stroke="var(--text-main)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+            </div>
+            <h1 class="qrlytics-title-header" style="justify-self: center;">QRAnalytics</h1>
+            <div></div>
+        </header>
+
+        <div id="portalSelectionSection" class="hidden" style="width:100%; height:100%; position:fixed; top:0; left:0; z-index:2000; background: var(--background); display:flex; flex-direction:column; box-sizing:border-box; overflow-y:auto;">
+            
+            <!-- Header Logo Section -->
+            <div class="portal-header-row">
+                <div></div>
+                <h1 class="qrlytics-title" style="margin: 0; font-size: 25.6px; text-align: center;">QRAnalytics</h1>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button onclick="performLogout()" class="portal-signout-btn">Sign Out</button>
+                </div>
+            </div>
+
+            <!-- Center Content -->
+            <div class="portal-center-content" style="flex: 1; display:flex; flex-direction:column; justify-content:flex-start; align-items:center; padding: 16px;">
+                <div class="workspace-header-bg">
+                    <h2 style="font-size:28.8px; margin-top:0; margin-bottom:6.4px; background:-webkit-linear-gradient(45deg, #4f46e5, #8b5cf6); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:800; letter-spacing:-0.8px; text-align:center;">Select Your Workspace</h2>
+                    <p style="color:var(--text-muted); margin-bottom:0; font-size:12.8px; font-weight: 500; text-align:center;">Choose a portal to load the associated data and workflows.</p>
+                </div>
+                <div id="portalCardsContainer" style="display:flex; gap:25.6px; flex-wrap:wrap; justify-content:center; width: 100%; max-width: 960px; position:relative; z-index:2;">
+                <div class="portal-card" onclick="selectPortal('Operations')">
+                    <div class="portal-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"><svg width="32" height="32" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg></div>
+                    <h3>Operations</h3>
+                    <p>Manage daily operational audits, assets, and terminal issues.</p>
+                </div>
+                <div class="portal-card" onclick="selectPortal('Quality')">
+                    <div class="portal-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><svg width="32" height="32" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+                    <h3>Quality</h3>
+                    <p>Ensure hygiene, cleanliness, and strict quality compliance.</p>
+                </div>
+                <!-- <div class="portal-card" onclick="selectPortal('Attendance')">
+                    <div class="portal-icon" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);"><svg width="32" height="32" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                    <h3>Attendance</h3>
+                    <p>Mark daily attendance via QR code scanning securely.</p>
+                </div> -->
+                </div>
+            </div>
+        </div>
+
+        <div class="split-wrapper" id="masterSplitWrapper">
+            <div class="side-hero" id="loginHero">
+                <h2 class="qrlytics-title-header" style="text-align: left; margin-bottom: 12.8px; font-size: 44.8px;">QRAnalytics</h2>
+                <div class="enterprise-badge">ENTERPRISE ACCESS</div>
+                <h3 id="heroTitle" style="margin:0; font-weight:700; font-size: 16px; letter-spacing: -0.4px; color: white; display: none;">Quality Portal</h3>
+                <p id="heroSub" style="color: rgba(255,255,255,0.8); font-size:12px; margin-top: 6.4px; font-weight: 400; line-height: 1.6;">Advanced Operations and Quality Monitoring Software. Log in to track real-time issues, resolve tickets faster, and visualize smart data on your AI-driven dashboard.</p>
+            </div>
+
+            <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <main class="side-content">
+        
+        <div id="loginSection" class="container">
+            <div style="text-align: center; margin-bottom: 25.6px;" class="login-header-desktop">
+                <h1 class="qrlytics-title-header mobile-only" style="font-size: 28.8px; margin-bottom: 12.8px; justify-content: center;">QRAnalytics</h1>
+                <h2 style="color: #000000; font-size: 20.8px; margin-bottom: 6.4px; font-weight: 800; letter-spacing: -0.4px;">Welcome</h2>
+                <p style="color: #64748b; font-size: 10.4px; margin-top: 0;">Please enter your credentials to continue</p>
+            </div>
+            
+            <div class="login-header-mobile" style="display: none;">
+                <h1>QRAnalytics</h1>
+                <p>Sign in to continue</p>
+            </div>
+
+            <div class="input-wrapper-mobile">
+                <svg class="left-icon" style="display: none;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                <input type="text" id="username" placeholder="Username" style="border: 1px solid #e2e8f0; border-radius: 6.4px; padding: 11.2px 12.8px; width: 100%; box-sizing: border-box; margin-bottom: 12.8px; font-size: 11.2px; background: #f8fafc;" onkeypress="if(event.key === 'Enter') document.getElementById('password').focus()">
+            </div>
+            
+            <div class="input-wrapper-mobile" style="position: relative; width: 100%; display: block;">
+                <svg class="left-icon" style="display: none;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                <input type="password" id="password" placeholder="Password" style="border: 1px solid #e2e8f0; border-radius: 6.4px; padding: 11.2px 12.8px; width: 100%; box-sizing: border-box; padding-right: 32px; font-size: 11.2px; background: #f8fafc;" onkeypress="if(event.key === 'Enter') performLogin()">
+                <button type="button" onclick="const p = document.getElementById('password'); p.type = p.type === 'password' ? 'text' : 'password';" style="position: absolute; right: 6.4px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; color: #00f3ff; display: flex; align-items: center; justify-content: center; height: 25.6px; width: 25.6px; z-index: 10;">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                </button>
+            </div>
+            
+            <label class="remember-me-container" style="display:flex; align-items:center; font-weight:500; gap:8px; margin-top:12.8px; margin-bottom: 19.2px; font-size:9.6px; cursor:pointer; color: #64748b;">
+                <input type="checkbox" id="rememberMe"> Remember my session
+            </label>
+
+            <button id="loginBtn" onclick="performLogin()" style="width: 100%; background: #2563eb; color: white; border: none; border-radius: 6.4px; padding: 11.2px; font-weight: 600; font-size: 11.2px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6.4px; text-transform: uppercase; letter-spacing: 0.4px;">SIGN IN &rarr;</button>
+            <div id="loginLoader"></div>
+            <p id="loginError" style="color: var(--danger-red); display:none; text-align:center; font-weight:500; font-size: 10.4px; margin-top:16px; background: #fef2f2; padding: 9.6px; border-radius: var(--radius-md); border: 1px solid #fecaca;">Access Denied. Please check your credentials.</p>
+            
+            <div class="footer-copyright" style="text-align: center; margin-top: auto; padding-top: 25.6px; font-size: 8px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">&copy; 2026 QRAnalytics | SECURE LOGIN</div>
+        </div>
+
+        <div id="attendanceSection" class="container hidden">
+            <div id="attendanceInitial" style="text-align:center; padding: 16px 0;">
+                <h2 style="font-size:22.4px; margin-bottom:6.4px;">Daily Attendance</h2>
+                <p id="attMainSub" style="color: var(--text-muted); font-size: 12px; margin-top: 0; margin-bottom: 25.6px;">Please wait, checking status...</p>
+                
+                <div id="attLoadingBox" style="margin-bottom: 19.2px; color: var(--primary-blue); font-weight: 600;">
+                    <div class="spinner" style="border: 2.4px solid var(--border-color); border-top: 2.4px solid var(--brand-primary); border-radius: 50%; width: 19.2px; height: 19.2px; animation: spin 0.8s linear infinite; margin: 0 auto 9.6px auto;"></div>
+                    Checking status...
+                </div>
+                
+                <div id="attActionBox" style="display: none; gap: 12.8px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="showAttendanceScanner()" id="attScanBtn" class="reduced-btn">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg> 
+                        Scan QR Code
+                    </button>
+                </div>
+                
+                <div id="attSummaryBox" class="hidden" style="background: var(--background); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-top: 19.2px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto; box-shadow: var(--shadow-sm);">
+                    <h3 style="margin-top: 0; margin-bottom: 12.8px; font-size: 12.8px; border-bottom: 1px solid var(--border-color); padding-bottom: 6.4px; color: var(--text-main);">Today's Details</h3>
+                    <p style="margin-bottom: 9.6px; color: var(--text-main); font-size: 11.2px;"><strong>Employee:</strong> <span id="sumName"></span></p>
+                    <p style="margin-bottom: 9.6px; color: var(--text-main); font-size: 11.2px;"><strong>Date:</strong> <span id="sumDate"></span></p>
+                    <p style="margin-bottom: 9.6px; color: var(--text-main); font-size: 11.2px;"><strong>IN Time:</strong> <span id="sumIn"></span></p>
+                    <p style="margin-bottom: 0; color: var(--text-main); font-size: 11.2px;"><strong>OUT Time:</strong> <span id="sumOut">--</span></p>
+                </div>
+
+                <div id="mgrAttBtnBox" class="hidden" style="margin-top: 25.6px; text-align: center;">
+                    <button id="btnViewAttDetails" class="reduced-btn" onclick="switchTab('attendanceReport'); loadAttendanceData();" style="background: var(--brand-primary); color: white;">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4.8px; vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> View Attendance Details
+                    </button>
+                </div>
+            </div>
+            
+            <div id="attendanceQrBox" class="hidden">
+                <div id="attendanceReader" style="width: 100%; max-width: 320px; margin: 0 auto; background: var(--sidebar-bg); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-lg);"></div>
+                <button onclick="cancelAttendanceScanner()" class="btn-danger" style="display: block; margin: 19.2px auto 0; width: 50%;">Cancel Scan</button>
+            </div>
+            
+            <div id="attendanceConfirmBox" class="hidden" style="text-align:center; padding: 16px 0;">
+                <h2 id="attConfirmTitle">Confirm Attendance</h2>
+                <div style="background: var(--background); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-bottom: 19.2px; text-align: left; max-width: 320px; margin-left: auto; margin-right: auto;">
+                    <p style="margin-bottom: 9.6px; color: var(--text-main);"><strong>Employee:</strong> <span id="attEmpName"></span></p>
+                    <p style="margin-bottom: 9.6px; color: var(--text-main);"><strong>Date:</strong> <span id="attDate"></span></p>
+                    <p style="margin-bottom: 0; color: var(--text-main);"><strong>Time:</strong> <span id="attTime"></span></p>
+                </div>
+                <input type="hidden" id="attQrId">
+                
+                <div class="form-grid" style="max-width: 320px; margin: 0 auto;">
+                    <button type="button" class="btn-secondary" style="margin:0;" onclick="cancelAttendanceScanner()">Cancel</button>
+                    <button type="button" id="attSubmitBtn" class="btn-success" style="margin:0;" onclick="submitAttendance()">Mark Attendance</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="attendanceReportSection" class="container hidden" style="max-width: 720px; padding-bottom: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 19.2px;">
+                <h2 style="margin: 0; font-size: 19.2px;">Attendance Details</h2>
+                <button onclick="switchTab('attendance')" class="btn-secondary" style="margin: 0; padding: 6.4px 12.8px;">Back to Scanner</button>
+            </div>
+
+            <div class="glass-panel" style="padding: 16px; border-radius: var(--radius-lg); margin-bottom: 19.2px; display: grid; grid-template-columns: 1fr 1fr; gap: 12.8px; align-items: end;">
+                <div>
+                    <label style="display: block; font-size: 10.4px; font-weight: 500; margin-bottom: 4.8px;">Filter by Date</label>
+                    <input type="text" id="attFilterDate" placeholder="Select Date" class="flatpickr-input" style="width: 100%; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 10.4px; font-weight: 500; margin-bottom: 4.8px;">Search by Employee</label>
+                    <input type="text" id="attFilterUser" placeholder="Employee Name" style="width: 100%; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-color);" oninput="renderAttendanceReport()">
+                </div>
+            </div>
+
+            <div class="glass-panel" style="padding: 16px; border-radius: var(--radius-lg); margin-bottom: 19.2px;">
+                <canvas id="attendanceChart" style="width:100%; height:240px;"></canvas>
+            </div>
+
+            <div class="glass-panel" style="border-radius: var(--radius-lg); overflow: hidden;">
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead style="background: var(--sidebar-bg); border-bottom: 1px solid var(--border-color);">
+                            <tr>
+                                <th style="padding: 12.8px; font-size: 10.4px; color: var(--text-muted); font-weight: 600;">Employee</th>
+                                <th style="padding: 12.8px; font-size: 10.4px; color: var(--text-muted); font-weight: 600;">Date</th>
+                                <th style="padding: 12.8px; font-size: 10.4px; color: var(--text-muted); font-weight: 600;">IN Time</th>
+                                <th style="padding: 12.8px; font-size: 10.4px; color: var(--text-muted); font-weight: 600;">OUT Time</th>
+                                <th style="padding: 12.8px; font-size: 10.4px; color: var(--text-muted); font-weight: 600;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attReportTableBody">
+                            <tr><td colspan="5" style="text-align: center; padding: 24px;">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="reportSection" class="container hidden">
+            <div id="qrInitial" style="text-align:center; padding: 16px 0;">
+                <h2 id="auditTitle" style="font-size:22.4px; margin-bottom:6.4px;">Asset Verification</h2>
+                <p style="color: var(--text-muted); font-size: 12px; margin-top: 0; margin-bottom: 25.6px;">Scan an asset tag or enter details manually to begin the audit.</p>
+                
+                <div style="display: flex; gap: 12.8px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="showScanner()" class="reduced-btn">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg> 
+                        Scan QR Code
+                    </button>
+                    <button onclick="skipQR()" class="reduced-btn btn-secondary">
+                        Manual Entry
+                    </button>
+                </div>
+            </div>
+            
+            <div id="qrBox" class="hidden">
+                <div id="reader"></div>
+                <button onclick="cancelScanner()" class="btn-danger">Cancel Scan</button>
+            </div>
+            
+            <div id="formBox" class="hidden">
+                <h2 id="formTitle">Audit Details</h2>
+                <form id="monitoringForm">
+                    
+                    <div style="background: var(--background); padding: 16px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); margin-bottom: 19.2px;">
+                        <div class="form-grid">
+                            <div>
+                                <label id="lblAsset" style="margin-top:0;">Asset Code</label>
+                                <input type="text" id="Asset_Code" readonly>
+                            </div>
+                            <div>
+                                <label id="lblTerminal" style="margin-top:0;">Terminal</label>
+                                <input type="text" id="Terminal" readonly>
+                            </div>
+                        </div>
+                        <div class="form-grid" style="margin-top: 12.8px;">
+                            <div>
+                                <label id="lblPackage" style="margin-top:0;">Package</label>
+                                <input type="text" id="Package" readonly>
+                            </div>
+                            <div>
+                                <label id="lblMedia" style="margin-top:0;">Media Type</label>
+                                <input type="text" id="Media_Type" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <h3>Issue Classification</h3>
+                    <label style="margin-top: 0;">Select Issue Type</label>
+                    <div id="dynamicIssueTypes" class="options-grid"></div>
+                    
+                    <label style="margin-top: 19.2px;">Specific Description</label>
+                    <div id="dynamicIssueDesc" class="options-grid" style="margin-bottom: 19.2px;"></div>
+
+                    <div class="camera-box">
+                        <label style="margin-top: 0; margin-bottom: 6.4px;">Photographic Evidence</label>
+                        <p style="font-size: 9.6px; color: var(--text-muted); margin-bottom: 12.8px; margin-top: 0;">Upload or capture an image of the reported issue.</p>
+                        <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhoto(event)">
+                        <button type="button" onclick="document.getElementById('photoInput').click()" class="btn-reduced-60 btn-secondary">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                            Upload Photo
+                        </button>
+                        <img id="cameraPreview" onclick="showBigImage(this.src)">
+                    </div>
+
+                    <div class="form-grid" style="margin-top: 25.6px;">
+                        <button type="button" class="btn-secondary" style="margin:0;" onclick="resetToInitial()">Cancel</button>
+                        <button type="submit" id="submitBtn" class="btn-success" style="margin:0;">Submit Audit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="globalFilterSection" class="hidden" style="margin-bottom: 19.2px;">
+            <div class="glass-panel" style="background: var(--surface); padding: 12.8px 19.2px; margin-bottom: 9.6px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-radius: var(--radius-lg); user-select: none;" onclick="toggleFilters()">
+                <div style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--text-main); font-size: 11.2px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary-blue);"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+                    Filters & Search
+                </div>
+                <div id="filterToggleBtn" style="font-size: 10.4px; font-weight: 600; color: var(--primary-blue); background: rgba(37,99,235,0.1); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 4px;">
+                    Collapse <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                </div>
+            </div>
+            <div class="filter-row glass-panel" id="filterContentRow" style="background: rgba(255,255,255,0.6); margin-bottom: 19.2px;">
+                <div style="grid-column: span 2;"><label style="margin-top:0;">Date Range</label><input type="text" id="filterDateRange" placeholder="Select Dates..." style="margin-top:0; cursor: pointer; background: #fff;"></div>
+                <div><label style="margin-top:0;">Terminal</label><select id="filterTerminal" multiple onchange="applyFilters()"></select></div>
+                <div><label style="margin-top:0;">Media Type</label><select id="filterMedia" multiple onchange="applyFilters()"></select></div>
+                <div><label style="margin-top:0;">Package</label><select id="filterPackage" multiple onchange="applyFilters()"></select></div>
+                <div><label style="margin-top:0;">Issue Type</label><select id="filterIssueType" multiple onchange="applyFilters()"></select></div>
+                <div><label style="margin-top:0;">Issue Desc</label><select id="filterIssueDesc" multiple onchange="applyFilters()"></select></div>
+                <div><label style="margin-top:0;">Status</label><select id="filterStatus" multiple onchange="applyFilters()"><option value="Open">Open</option><option value="Closed">Closed</option><option value="Site OK">Site OK</option></select></div>
+                <div><label style="margin-top:0;">Records</label><select id="filterUniqueness" onchange="applyFilters()"><option value="All">All</option><option value="Unique">Unique</option></select></div>
+                <div id="issueAgeFilterContainer" style="grid-column: span 3; display: none;">
+                    <label style="margin-top:0; display:flex; justify-content:space-between;">
+                        <span>Issue Age</span>
+                        <span id="issueAgeDisplay" style="font-weight:600; color:var(--primary);">All</span>
+                    </label>
+                    <div class="dual-slider-container" style="margin-top: 8px;">
+                        <div class="dual-slider-track" id="issueAgeTrack"></div>
+                        <input type="range" id="issueAgeMin" class="dual-slider-input" min="0" max="7" value="0" oninput="updateIssueAgeSlider()" onchange="applyFilters()">
+                        <input type="range" id="issueAgeMax" class="dual-slider-input" min="0" max="7" value="7" oninput="updateIssueAgeSlider()" onchange="applyFilters()">
+                    </div>
+                </div>
+                <div style="grid-column: span 3;"><label style="margin-top:0; visibility: hidden;">Search</label>
+                <div style="display:flex; gap:9.6px;">
+                    <input type="text" id="assetSearch" placeholder="Search Asset ID..." style="margin:0; height:35.2px;" oninput="applyFilters()">
+                    <button type="button" class="btn" style="height:35.2px; padding:0 12.8px;" onclick="resetFilters()">Clear Filters</button>
+                </div>
+                </div>
+            </div>
+            
+            <div class="kpi-grid">
+                <div class="kpi-card clickable" onclick="handleKpiClick('total')"><h3>Total Audits</h3><p id="kpiTotal">0</p></div>
+                <div class="kpi-card clickable" onclick="handleKpiClick('open')"><h3>Open Actions</h3><p id="kpiOpen">0</p></div>
+                <div class="kpi-card clickable" onclick="handleKpiClick('closed')"><h3>Resolved</h3><p id="kpiClosed">0</p></div>
+                <div class="kpi-card clickable" onclick="handleKpiClick('site ok')"><h3>Site OK</h3><p id="kpiSiteOk">0</p></div>
+            </div>
+        </div>
+
+        <div id="closeSection" class="container hidden" style="background: transparent; box-shadow: none; padding: 0; border: none;">
+            <div class="sub-nav-tabs">
+                <button id="btnOpen" class="sub-nav-btn active" onclick="setIssueView('open')">OPEN ISSUES</button>
+                <button id="btnClosed" class="sub-nav-btn" onclick="setIssueView('closed')">RESOLVED ISSUES</button>
+                <button id="btnSiteOk" class="sub-nav-btn" onclick="setIssueView('site ok')">SITE OK</button>
+            </div>
+            <div id="issueList">
+                <div style="text-align:center; padding:32px; color:var(--text-muted);">Loading workspace data...</div>
+            </div>
+        </div>
+
+        <div id="dashSection" class="container hidden" style="background: transparent; box-shadow: none; padding: 0; border: none;">
+            <div class="chart-box" id="historyContainer" style="margin-bottom: 19.2px; height: 280px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12.8px;">
+                    <h4 id="trendTitle" style="margin:0;">Audit Log History</h4>
+                    <button onclick="exportAuditLog()" class="btn-secondary" style="width: auto; padding: 4.8px 12.8px; font-size: 9.6px; height: 25.6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 3.2px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Export CSV
+                    </button>
+                </div>
+                <div id="historyContent" class="table-container"></div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-box">
+                    <h4>Activity Trends (Total vs Open vs Resolved)</h4>
+                    <div class="chart-container-inner"><canvas id="chartTrendLine"></canvas></div>
+                </div>
+                <div class="chart-box"><h4>Terminal Distribution</h4><div class="chart-container-inner"><canvas id="chartTerminal"></canvas></div></div>
+                <div class="chart-box"><h4>Issue Categorization</h4><div class="chart-container-inner"><canvas id="chartIssueType"></canvas></div></div>
+                <div class="chart-box"><h4>Media Type Spread</h4><div class="chart-container-inner"><canvas id="chartMedia"></canvas></div></div>
+                <div class="chart-box"><h4>Package Breakdown</h4><div class="chart-container-inner"><canvas id="chartPackage"></canvas></div></div>
+                <div class="chart-box"><h4>Reporter Activity</h4><div class="chart-container-inner"><canvas id="chartReportedBy"></canvas></div></div>
+                <div class="chart-box" style="grid-column: 1 / -1; height: 272px;"><h4>Detailed Analysis</h4><div class="chart-container-inner"><canvas id="chartDesc"></canvas></div></div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<footer class="global-footer">
+    &copy; 2026 Powered by QRAnalytics | Designed & Developed By Pankaj Sharma<br>
+    <a href="privacypolicy.html" style="color: var(--primary-blue); text-decoration: none; font-size: 9.6px; margin-top: 6.4px; display: inline-block; font-weight: 500;">Privacy Policy</a>
+</footer>
+
+<script>
+    Chart.register(ChartDataLabels);
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyjWv9Qvi212R7orV9kFGj3QRZlb60_UyewjPBQJvqmgq4E2hZc77iNbWlQKY3Ws07V/exec';
+    
+    window.addEventListener('popstate', function(e) {
+        const state = e.state;
+
+        if (document.getElementById('imageModalOverlay')) {
+            document.getElementById('imageModalOverlay').remove();
+        }
+
+        if (!state) {
+            localStorage.removeItem('qrl_session'); 
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('loginHero').classList.remove('hidden');
+            document.getElementById('portalSelectionSection').classList.add('hidden');
+            document.getElementById('masterSplitWrapper').style.display = 'none';
+            document.getElementById('topHeader').classList.add('hidden');
+            return;
+        }
+
+        if (state.view === 'portals') {
+            showPortalSelection(true);
+        } else if (state.view === 'main') {
+            if (!document.getElementById('attendanceQrBox').classList.contains('hidden') || !document.getElementById('attendanceConfirmBox').classList.contains('hidden')) {
+                cancelAttendanceScanner(true);
+            }
+            if (document.getElementById('qrBox') && !document.getElementById('qrBox').classList.contains('hidden')) {
+                cancelScanner(true);
+            }
+            document.getElementById('portalSelectionSection').classList.add('hidden');
+            document.getElementById('masterSplitWrapper').style.display = 'flex';
+            document.getElementById('topHeader').classList.remove('hidden');
+            document.getElementById('mainSidebar').classList.remove('hidden'); 
+            
+            if (state.tab) {
+                switchTab(state.tab, true);
+            }
+        }
+    });
+
+    let currentUser = null, config = null, html5QrCode = null, rawData = [], currentView = 'open', dashboardCharts = {};
+
+    function updateMultiSelectBox(originalSelect, box) {
+        let selectedCount = 0;
+        let singleText = "";
+        Array.from(originalSelect.options).forEach(opt => {
+            if(opt.selected && opt.value !== "") {
+                selectedCount++;
+                singleText = opt.text || opt.value;
+            }
+        });
+        if(selectedCount === 0) {
+            box.innerText = "All";
+        } else if(selectedCount === 1) {
+            box.innerText = singleText;
+        } else {
+            box.innerText = `${selectedCount} selections`;
+        }
+    }
+
+    function buildMultiSelect(selectId) {
+        const originalSelect = document.getElementById(selectId);
+        if(!originalSelect) return;
+        
+        originalSelect.style.display = 'none';
+        
+        let wrapper = originalSelect.nextElementSibling;
+        if(!wrapper || !wrapper.classList.contains('multi-select-wrapper')) {
+            wrapper = document.createElement('div');
+            wrapper.className = 'multi-select-wrapper';
+            originalSelect.parentNode.insertBefore(wrapper, originalSelect.nextSibling);
+            
+            const box = document.createElement('div');
+            box.className = 'multi-select-box';
+            box.onclick = (e) => {
+                e.stopPropagation();
+                const isOpen = dropdown.classList.contains('show');
+                document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('show'));
+                if(!isOpen) dropdown.classList.add('show');
+            };
+            
+            const dropdown = document.createElement('div');
+            dropdown.className = 'multi-select-dropdown';
+            dropdown.onclick = (e) => e.stopPropagation();
+            
+            wrapper.appendChild(box);
+            wrapper.appendChild(dropdown);
+        }
+        
+        wrapper = originalSelect.nextElementSibling;
+        const box = wrapper.querySelector('.multi-select-box');
+        const dropdown = wrapper.querySelector('.multi-select-dropdown');
+        
+        dropdown.innerHTML = '';
+        
+        const options = Array.from(originalSelect.options);
+        options.forEach(opt => {
+            if(opt.value === "") return; // Skip "All" placeholder option
+            
+            const lbl = document.createElement('label');
+            lbl.className = 'multi-select-option';
+            
+            const cb = document.createElement('input');
+            cb.type = 'checkbox';
+            cb.value = opt.value;
+            cb.checked = opt.selected;
+            cb.onchange = (e) => {
+                opt.selected = e.target.checked;
+                applyFilters();
+                updateMultiSelectBox(originalSelect, box);
+            };
+            
+            lbl.appendChild(cb);
+            lbl.appendChild(document.createTextNode(' ' + (opt.text || opt.value)));
+            dropdown.appendChild(lbl);
+        });
+        
+        updateMultiSelectBox(originalSelect, box);
+    }
+
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('show'));
+    });
+
+    let escPressCount = 0;
+    let escTimeout;
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            escPressCount++;
+            if (escPressCount === 2) {
+                resetFilters();
+                escPressCount = 0;
+                clearTimeout(escTimeout);
+            } else {
+                clearTimeout(escTimeout);
+                escTimeout = setTimeout(() => { escPressCount = 0; }, 500);
+            }
+        } else {
+            escPressCount = 0;
+        }
+    });
+
+    function getSelectedValues(id) {
+        const el = document.getElementById(id);
+        if(!el) return [];
+        return Array.from(el.selectedOptions).map(opt => opt.value).filter(v => v !== "");
+    }
+    let currentPhotoBase64 = "";
+    
+    let dynamicIssueMapping = {};
+    let fullAuditMapping = {};
+    let currentAuditType = 'Operations';
+    let currentListCategory = 'Operations';
+    let currentDashCategory = 'Operations';
+
+    function getAuditType(issue) {
+        // Check if ANY property in the issue exactly matches 'Quality' or 'Operations' 
+        // (This handles cases where the Audit_Type column shifted in Google Sheets)
+        for (let key in issue) {
+            if (issue[key]) {
+                let val = issue[key].toString().trim().toLowerCase();
+                if (val === 'quality') return 'Quality';
+                if (val === 'operations') return 'Operations';
+            }
+        }
+        
+        if (issue.Audit_Type) {
+            let at = issue.Audit_Type.toString().trim();
+            return at;
+        }
+        if (!issue.Issue_Type) return 'Operations';
+        if (fullAuditMapping['Quality'] && Object.keys(fullAuditMapping['Quality']).includes(issue.Issue_Type)) {
+            return 'Quality';
+        }
+        return 'Operations';
+    }
+
+    function compressImage(file, maxWidth, maxHeight, quality, callback) {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                        width = Math.round((width * maxHeight) / height);
+                        height = maxHeight;
+                    }
+                }
+
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+                callback(compressedBase64);
+            };
+        };
+    }
+
+    function applyRoleAccess() {
+        if (!currentUser) return;
+        const role = currentUser.role || '';
+        const menuClose = document.getElementById('menuClose');
+        const menuDash = document.getElementById('menuDash');
+        if (menuClose) menuClose.style.display = role === 'OpsTeam' ? 'none' : 'flex';
+        if (menuDash) menuDash.style.display = (role === 'OpsTeam' || role === 'TL') ? 'none' : 'flex';
+    }
+
+    window.onload = () => {
+        buildMultiSelect("filterStatus");
+        const sessionData = localStorage.getItem('qrl_session');
+        if(sessionData) {
+            const data = JSON.parse(sessionData);
+            currentUser = data.user; config = data.config;
+            applyConfig(); applyRoleAccess();
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('loginHero').classList.add('hidden'); 
+            
+            if (!history.state) {
+                history.replaceState({ view: 'portals' }, '', '#portals');
+            }
+
+            const storedPortal = localStorage.getItem('qrl_portal');
+            if (storedPortal) {
+                const currentTab = localStorage.getItem('qrl_section') || 'report';
+                if (!history.state || history.state.view !== 'main') {
+                    history.pushState({ view: 'main', portal: storedPortal, tab: currentTab }, '', '#' + currentTab);
+                }
+                selectPortal(storedPortal, true, true);
+                switchTab(currentTab, true);
+            } else {
+                showPortalSelection(true);
+            }
+        } else {
+            history.replaceState(null, '', window.location.pathname);
+        }
+    };
+
+    function getPendingTime(timestamp) {
+        if(!timestamp) return "N/A";
+        const diff = Math.abs(new Date() - new Date(timestamp));
+        const hours = Math.floor(diff / (1000 * 60 * 60)), mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        return `${hours}h ${mins}m`;
+    }
+
+    function handlePhoto(event) {
+        const file = event.target.files[0];
+        if(!file) return;
+        
+        compressImage(file, 1024, 1024, 0.7, (compressedBase64) => {
+            currentPhotoBase64 = compressedBase64;
+            const preview = document.getElementById('cameraPreview');
+            preview.src = currentPhotoBase64; 
+            preview.style.display = "block";
+        });
+    }
+
+    function showBigImage(src) {
+        if(!src || src === "undefined" || src === "null") return;
+
+        if (src.startsWith('data:image') || src.startsWith('blob:')) {
+            history.pushState({ view: 'scanner' }, '', '#scanner');
+            const overlay = document.createElement('div');
+            overlay.className = 'preview-overlay';
+            overlay.id = 'imageModalOverlay';
+            overlay.innerHTML = `<div class="image-modal" onclick="event.stopPropagation()">
+                <div class="modal-controls">
+                    <button class="modal-btn" onclick="this.parentElement.parentElement.querySelector('img').style.transform += 'rotate(90deg)'">Rotate</button>
+                    <button class="modal-btn" onclick="if(history.state && history.state.view==='scanner') history.back(); else this.closest('.preview-overlay').remove()">Close</button>
+                </div>
+                <img src="${src}" style="transition: transform 0.3s">
+            </div>`;
+            overlay.onclick = () => {
+                if(history.state && history.state.view === 'scanner') history.back();
+                else overlay.remove();
+            };
+            document.body.appendChild(overlay);
+        } 
+        else {
+            let directSrc = src;
+            if (src.includes('drive.google.com')) {
+                const id = src.match(/[-\w]{25,}/);
+                if (id) directSrc = `https://drive.google.com/file/d/${id[0]}/view`;
+            }
+            window.open(directSrc, '_blank');
+        }
+    }
+
+    async function performLogin() {
+        const u = document.getElementById('username').value.trim().toLowerCase(), p = document.getElementById('password').value;
+        if (u === 'admin' && p === 'Tim@654321') { window.location.href = 'admin.html'; return; }
+        document.getElementById('loginBtn').innerText = "Authenticating...";
+        document.getElementById('loginLoader').style.display = "block";
+        try {
+            const resp = await fetch(`${scriptURL}?action=login&u=${u}&p=${p}`);
+            const res = await resp.json();
+            if (res.success) {
+                if(document.getElementById('rememberMe').checked) {
+                    localStorage.setItem('qrl_u', u); localStorage.setItem('qrl_p', p);
+                }
+                currentUser = res.user; config = res.config;
+                localStorage.setItem('qrl_session', JSON.stringify({user: currentUser, config: config}));
+                localStorage.setItem('qrl_section', 'report');
+                history.pushState({ view: 'portals' }, '', '#portals');
+                location.reload();
+            } else { 
+                document.getElementById('loginError').style.display='block'; 
+                document.getElementById('loginBtn').innerText = "Sign In";
+                document.getElementById('loginLoader').style.display = "none";
+            }
+        } catch (e) { alert("Connection Error"); }
+    }
+
+    window.populateDescriptions = function(selectedType) {
+        const descBox = document.getElementById('dynamicIssueDesc');
+        descBox.innerHTML = ''; 
+        
+        if (dynamicIssueMapping[selectedType]) {
+            const hasTextBox = dynamicIssueMapping[selectedType].find(d => d.trim().startsWith('[TEXTBOX]'));
+            if (hasTextBox) {
+                const placeholder = hasTextBox.replace('[TEXTBOX]', '').trim() || 'Enter your remarks...';
+                descBox.innerHTML = `<div style="width:100%;"><input type="text" id="customDescriptionText" placeholder="${placeholder}" style="width:100%; margin-top:0;"></div>`;
+            } else {
+                dynamicIssueMapping[selectedType].forEach(desc => {
+                    descBox.innerHTML += `<label class="checkbox-item"><input type="radio" name="Issue_Description" value="${desc}">${desc}</label>`;
+                });
+            }
+        }
+    };
+
+    function applyConfig() {
+        if(!config) return;
+        document.getElementById('lblAsset').innerText = config.labelAsset || "Asset Code";
+        document.getElementById('clientPortalName').innerText = config.clientName;
+        
+        if(config.logoUrl) {
+            if(document.getElementById('dynamicLogo1')) document.getElementById('dynamicLogo1').src = config.logoUrl;
+            if(document.getElementById('heroLogo')) document.getElementById('heroLogo').src = config.logoUrl;
+            if(document.getElementById('sidebarLogo')) document.getElementById('sidebarLogo').src = config.logoUrl;
+        }
+        if(config.primaryColor) document.documentElement.style.setProperty('--primary-blue', config.primaryColor);
+        
+        try {
+            let parsed = config.issueDesc;
+            if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+            if (typeof parsed === 'string') parsed = JSON.parse(parsed); // Handle double stringify
+
+            if (parsed['Operations'] || parsed['Quality']) {
+                fullAuditMapping = parsed;
+            } else {
+                fullAuditMapping = { "Operations": parsed, "Quality": {} };
+            }
+        } catch(e) {
+            fullAuditMapping = { "Operations": { "General Issue": ["No description found. Please update Admin Config."] }, "Quality": {} };
+        }
+        
+        // Options are populated when audit type is selected
+    }
+	
+    function performLogout() { if(confirm("Sign out?")) { localStorage.clear(); sessionStorage.clear(); location.reload(); } }
+
+    function toggleMobileMenu() {
+        const sidebar = document.getElementById('mainSidebar');
+        const overlay = document.getElementById('mobileOverlay');
+        if (window.innerWidth <= 850) {
+            sidebar.classList.toggle('mobile-open');
+            if(sidebar.classList.contains('mobile-open')) {
+                overlay.classList.add('show');
+            } else {
+                overlay.classList.remove('show');
+            }
+        } else {
+            sidebar.classList.toggle('collapsed');
+        }
+    }
+
+    function switchTab(mode, fromPopState = false) {
+        if (!currentUser) return;
+        const role = currentUser.role || '';
+        if (role === 'OpsTeam' && (mode === 'close' || mode === 'dash')) return;
+        if (role === 'TL' && mode === 'dash') return;
+
+        localStorage.setItem('qrl_section', mode);
+        
+        if (!fromPopState) {
+            history.pushState({ view: 'main', tab: mode, portal: currentAuditType }, '', '#' + mode);
+        }
+        document.querySelectorAll('.side-content > .container').forEach(c => c.classList.add('hidden'));
+        document.getElementById(mode + 'Section').classList.remove('hidden');
+        if (mode === 'dash' || mode === 'close') {
+            document.getElementById('globalFilterSection').classList.remove('hidden');
+        } else {
+            const globalFilter = document.getElementById('globalFilterSection');
+            if(globalFilter) globalFilter.classList.add('hidden');
+        }
+        document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
+        const menuId = 'menu' + mode.charAt(0).toUpperCase() + mode.slice(1);
+        if(document.getElementById(menuId)) document.getElementById(menuId).classList.add('active');
+        if(mode !== 'report') refreshData(mode);
+
+        if (window.innerWidth <= 850) {
+            document.getElementById('mainSidebar').classList.remove('mobile-open');
+            document.getElementById('mobileOverlay').classList.remove('show');
+        }
+    }
+
+    // Obsolete Category Functions Removed
+
+    let datePickerInstance = null;
+    let dashStartDate = null;
+    let dashEndDate = null;
+
+    async function refreshData(mode) {
+        const resp = await fetch(`${scriptURL}?action=getIssues&clientId=${currentUser.clientId}`);
+        rawData = await resp.json();
+        if(mode === 'dash' || mode === 'close') { 
+            initDateRangePicker();
+            applyFilters(); 
+        } 
+    }
+
+    function initDateRangePicker() {
+        if (!datePickerInstance) {
+            datePickerInstance = flatpickr("#filterDateRange", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "M j, Y",
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length === 2) {
+                        dashStartDate = selectedDates[0];
+                        dashEndDate = selectedDates[1];
+                        document.getElementById('filterDateRange').classList.add('active-date-range');
+                        applyFilters();
+                    } else if (selectedDates.length === 0) {
+                        dashStartDate = null;
+                        dashEndDate = null;
+                        document.getElementById('filterDateRange').classList.remove('active-date-range');
+                        applyFilters();
+                    }
+                }
+            });
+        }
+    }
+
+    function resetFilters() {
+        ['filterTerminal', 'filterMedia', 'filterPackage', 'filterIssueType', 'filterIssueDesc', 'filterStatus'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.value = "";
+                Array.from(el.options).forEach(opt => opt.selected = false);
+            }
+        });
+        if (document.getElementById('filterUniqueness')) document.getElementById('filterUniqueness').value = 'All';
+        if (document.getElementById('assetSearch')) document.getElementById('assetSearch').value = "";
+        if (document.getElementById('issueAgeMin')) document.getElementById('issueAgeMin').value = 0;
+        if (document.getElementById('issueAgeMax')) document.getElementById('issueAgeMax').value = 7;
+        if (typeof updateIssueAgeSlider === 'function') updateIssueAgeSlider();
+        
+        if (document.getElementById('assetSearch')) document.getElementById('assetSearch').value = "";
+        
+        dashStartDate = null;
+        dashEndDate = null;
+        if(datePickerInstance) {
+            datePickerInstance.clear();
+        }
+        const el = document.getElementById('filterDateRange');
+        if (el) el.classList.remove('active-date-range');
+        applyFilters();
+        
+        ['filterStatus'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) buildMultiSelect(id);
+        });
+    }
+
+    function syncFilters() {
+        const ft = getSelectedValues('filterTerminal');
+        const fm = getSelectedValues('filterMedia');
+        const fp = getSelectedValues('filterPackage');
+        const fit = getSelectedValues('filterIssueType');
+        const fid = getSelectedValues('filterIssueDesc');
+        const fstatus = getSelectedValues('filterStatus');
+        const assetSearchEl = document.getElementById('assetSearch');
+        const searchAsset = assetSearchEl ? assetSearchEl.value.trim() : '';
+
+        const catData = rawData.filter(i => getAuditType(i) === currentDashCategory);
+
+        const matchExcept = (row, except) => {
+            if (searchAsset) {
+                const assetCode = row.Asset_Code || '';
+                const parts = assetCode.split('/');
+                const assetId = parts[parts.length - 1];
+                if (assetId !== searchAsset) return false;
+            }
+            if (except !== 'Terminal' && ft.length > 0 && !ft.includes(row.Terminal)) return false;
+            if (except !== 'Media' && fm.length > 0 && !fm.includes(row.Media_Type)) return false;
+            if (except !== 'Package' && fp.length > 0 && !fp.includes(row.Package)) return false;
+            if (except !== 'IssueType' && fit.length > 0 && !fit.includes(row.Issue_Type)) return false;
+            if (except !== 'IssueDesc' && fid.length > 0 && !fid.includes(row.Issue_Description)) return false;
+            return true;
+        };
+
+        const populate = (id, key, exceptName, currentValues) => {
+            const validData = catData.filter(i => matchExcept(i, exceptName));
+            const vals = [...new Set(validData.map(i => i[key]))].filter(Boolean);
+            
+            let html = `<option value="">All</option>`;
+            vals.forEach(v => {
+                html += `<option value="${v}" ${currentValues.includes(v) ? 'selected' : ''}>${v}</option>`;
+            });
+            const el = document.getElementById(id);
+            if (el) {
+                el.innerHTML = html;
+                buildMultiSelect(id);
+            }
+        };
+
+        populate('filterTerminal', 'Terminal', 'Terminal', ft);
+        populate('filterMedia', 'Media_Type', 'Media', fm);
+        populate('filterPackage', 'Package', 'Package', fp);
+        populate('filterIssueType', 'Issue_Type', 'IssueType', fit);
+        populate('filterIssueDesc', 'Issue_Description', 'IssueDesc', fid);
+    }
+
+    const issueAgeSteps = [
+        { label: '0 mins', mins: 0 },
+        { label: '30 mins', mins: 30 },
+        { label: '1 hr', mins: 60 },
+        { label: '2 hrs', mins: 120 },
+        { label: '4 hrs', mins: 240 },
+        { label: '8 hrs', mins: 480 },
+        { label: '24 hrs', mins: 1440 },
+        { label: '> 24 hrs', mins: 9999999 }
+    ];
+
+    function updateIssueAgeSlider() {
+        const minEl = document.getElementById('issueAgeMin');
+        const maxEl = document.getElementById('issueAgeMax');
+        if (!minEl || !maxEl) return;
+        let minVal = parseInt(minEl.value);
+        let maxVal = parseInt(maxEl.value);
+        
+        if (minVal > maxVal) {
+            let tmp = minVal;
+            minVal = maxVal;
+            maxVal = tmp;
+            minEl.value = minVal;
+            maxEl.value = maxVal;
+        }
+        
+        const minLabel = issueAgeSteps[minVal].label;
+        const maxLabel = issueAgeSteps[maxVal].label;
+        document.getElementById('issueAgeDisplay').innerText = minVal === maxVal ? minLabel : `${minLabel} - ${maxLabel}`;
+        
+        const track = document.getElementById('issueAgeTrack');
+        const percent1 = (minVal / 7) * 100;
+        const percent2 = (maxVal / 7) * 100;
+        track.style.background = `linear-gradient(to right, #e2e8f0 ${percent1}%, #2563eb ${percent1}%, #2563eb ${percent2}%, #e2e8f0 ${percent2}%)`;
+    }
+
+    let isSyncing = false;
+    let globalFilteredData = [];
+
+    function handleKpiClick(status) {
+        const isDashboard = !document.getElementById('dashSection').classList.contains('hidden');
+        if (!isDashboard) {
+            if (status === 'total') return;
+            setIssueView(status);
+        } else {
+            const select = document.getElementById('filterStatus');
+            if (!select) return;
+            Array.from(select.options).forEach(opt => opt.selected = false);
+            if (status === 'open') {
+                const opt = Array.from(select.options).find(o => o.value === 'Open');
+                if(opt) opt.selected = true;
+            } else if (status === 'closed') {
+                const opt = Array.from(select.options).find(o => o.value === 'Closed');
+                if(opt) opt.selected = true;
+            } else if (status === 'site ok') {
+                const opt = Array.from(select.options).find(o => o.value === 'Site OK');
+                if(opt) opt.selected = true;
+            }
+            buildMultiSelect('filterStatus');
+            applyFilters();
+        }
+    }
+
+    function toggleFilters() {
+        const row = document.getElementById('filterContentRow');
+        const btn = document.getElementById('filterToggleBtn');
+        if (row.style.display === 'none') {
+            row.style.display = '';
+            btn.innerHTML = 'Collapse <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>';
+        } else {
+            row.style.display = 'none';
+            btn.innerHTML = 'Expand <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
+        }
+    }
+    function applyFilters() {
+        if(isSyncing) return;
+        isSyncing = true;
+        const ft = getSelectedValues('filterTerminal');
+        const fm = getSelectedValues('filterMedia');
+        const fp = getSelectedValues('filterPackage');
+        const fit = getSelectedValues('filterIssueType');
+        const fid = getSelectedValues('filterIssueDesc');
+        const fstatus = getSelectedValues('filterStatus');
+        const assetSearchEl = document.getElementById('assetSearch');
+        const searchAsset = assetSearchEl ? assetSearchEl.value.trim() : '';
+        const funiqueEl = document.getElementById('filterUniqueness');
+        const funique = funiqueEl ? funiqueEl.value : 'All';
+        const now = new Date();
+        const minEl = document.getElementById('issueAgeMin');
+        const maxEl = document.getElementById('issueAgeMax');
+        let fageMin = 0, fageMax = 9999999;
+        if (minEl && maxEl) {
+            fageMin = issueAgeSteps[parseInt(minEl.value)].mins;
+            fageMax = issueAgeSteps[parseInt(maxEl.value)].mins;
+        }
+
+        let allowedUniqueIds = null;
+        if (funique === 'Unique') {
+            allowedUniqueIds = new Set();
+            const latest = {};
+            rawData.forEach(i => {
+                if (getAuditType(i) === currentDashCategory && i.Asset_Code) {
+                    const t = new Date(i.Reported_Timestamp).getTime();
+                    if (!latest[i.Asset_Code] || t > latest[i.Asset_Code].time) {
+                        latest[i.Asset_Code] = { time: t, id: i.rowId };
+                    }
+                }
+            });
+            Object.values(latest).forEach(v => allowedUniqueIds.add(v.id));
+        }
+
+        const kpiFiltered = [];
+        const filtered = rawData.filter(i => {
+            if (getAuditType(i) !== currentDashCategory) return false;
+            
+            if (allowedUniqueIds && !allowedUniqueIds.has(i.rowId)) return false;
+
+            if (searchAsset) {
+                const assetCode = i.Asset_Code || '';
+                const parts = assetCode.split('/');
+                const assetId = parts[parts.length - 1];
+                if (assetId !== searchAsset) return false;
+            }
+
+            if (ft.length > 0 && !ft.includes(i.Terminal)) return false;
+            if (fm.length > 0 && !fm.includes(i.Media_Type)) return false;
+            if (fp.length > 0 && !fp.includes(i.Package)) return false;
+            if (fit.length > 0 && !fit.includes(i.Issue_Type)) return false;
+            if (fid.length > 0 && !fid.includes(i.Issue_Description)) return false;
+            if (currentDashCategory === 'Operations') {
+                let diffMins = 0;
+                const sAge = (i.Current_Status || '').toLowerCase();
+                const isClosedAge = sAge === 'closed' || sAge === 'resolved' || sAge === 'site ok';
+                if (!isClosedAge) {
+                    diffMins = (now - new Date(i.Reported_Timestamp)) / 60000;
+                } else {
+                    const dur = i.Closure_Duration || '';
+                    const dMatch = dur.match(/(\d+)\s*d/i);
+                    const hMatch = dur.match(/(\d+)\s*h/i);
+                    const mMatch = dur.match(/(\d+)\s*m/i);
+                    if (dMatch) diffMins += parseInt(dMatch[1]) * 24 * 60;
+                    if (hMatch) diffMins += parseInt(hMatch[1]) * 60;
+                    if (mMatch) diffMins += parseInt(mMatch[1]);
+                    if (!dMatch && !hMatch && !mMatch) {
+                        const parsed = parseFloat(dur);
+                        if (!isNaN(parsed)) diffMins = parsed;
+                    }
+                }
+                
+                // If fageMin is 0, allow negative diffMins (future timestamps from timezone differences)
+                if (diffMins > fageMax || (fageMin > 0 && diffMins < fageMin)) return false;
+            }
+            if (dashStartDate && dashEndDate) {
+                const rowDate = new Date(i.Reported_Timestamp);
+                rowDate.setHours(0,0,0,0);
+                const s = new Date(dashStartDate); s.setHours(0,0,0,0);
+                const e = new Date(dashEndDate); e.setHours(0,0,0,0);
+                if (rowDate < s || rowDate > e) return false;
+            }
+
+            kpiFiltered.push(i);
+
+            if (fstatus.length > 0) {
+                const s = (i.Current_Status || '').toLowerCase();
+                const isClosed = s === 'closed' || s === 'resolved';
+                const isSiteOk = s === 'site ok';
+                let match = false;
+                if (fstatus.includes('Open') && !isClosed && !isSiteOk) match = true;
+                if (fstatus.includes('Closed') && isClosed) match = true;
+                if (fstatus.includes('Site OK') && isSiteOk) match = true;
+                if (!match) return false;
+            }
+            return true;
+        });
+
+        document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
+        const isDashMode = !document.getElementById('dashSection').classList.contains('hidden');
+        if (isDashMode) {
+            if (fstatus.length === 1) {
+                if (fstatus.includes('Open')) document.querySelectorAll('.kpi-card')[1]?.classList.add('active-kpi');
+                else if (fstatus.includes('Closed')) document.querySelectorAll('.kpi-card')[2]?.classList.add('active-kpi');
+                else if (fstatus.includes('Site OK')) document.querySelectorAll('.kpi-card')[3]?.classList.add('active-kpi');
+            } else if (fstatus.length === 0) {
+                document.querySelectorAll('.kpi-card')[0]?.classList.add('active-kpi');
+            }
+        }
+        
+        globalFilteredData = filtered;
+        syncFilters();
+        renderDashboard(filtered, false, "", kpiFiltered);
+        renderIssueList();
+        
+        isSyncing = false;
+    }
+
+    // renderAssetTrend has been removed; search now integrated into applyFilters
+
+    function exportAuditLog() {
+        const dataToExport = window.currentExportData || rawData.filter(i => getAuditType(i) === currentDashCategory);
+        if(dataToExport.length === 0) return;
+        let csv = "Reported_Timestamp,Asset_Code,Terminal,Package,Media_Type,Issue_Type,Issue_Description,Reported_By,Current_Status,Ticket_ID,Closed_Timestamp,Closed_By,Closure_Duration\n";
+        dataToExport.forEach(row => {
+            const escapeCSV = (str) => str ? '"' + str.toString().replace(/"/g, '""') + '"' : '""';
+            csv += `${escapeCSV(new Date(row.Reported_Timestamp).toLocaleString())},${escapeCSV(row.Asset_Code)},${escapeCSV(row.Terminal)},${escapeCSV(row.Package)},${escapeCSV(row.Media_Type)},${escapeCSV(row.Issue_Type)},${escapeCSV(row.Issue_Description)},${escapeCSV(row.Reported_By)},${escapeCSV(row.Current_Status)},${escapeCSV(row.Ticket_ID)},${row.Closed_Timestamp ? escapeCSV(new Date(row.Closed_Timestamp).toLocaleString()) : '""'},${escapeCSV(row.Closed_By)},${escapeCSV(row.Closure_Duration)}\n`;
+        });
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', `Audit_Log_${new Date().toLocaleDateString()}.csv`);
+        a.click();
+    }
+
+    function renderDashboard(dataToUse, isAsset = false, assetCode = "", kpiDataToUse = dataToUse) {
+        document.getElementById('kpiTotal').innerText = kpiDataToUse.length;
+        document.getElementById('kpiOpen').innerText = kpiDataToUse.filter(i => {
+            const s = (i.Current_Status||'').toLowerCase();
+            return s !== 'closed' && s !== 'site ok';
+        }).length;
+        document.getElementById('kpiClosed').innerText = kpiDataToUse.filter(i => (i.Current_Status||'').toLowerCase() === 'closed').length;
+        document.getElementById('kpiSiteOk').innerText = kpiDataToUse.filter(i => (i.Current_Status||'').toLowerCase() === 'site ok').length;
+        const content = document.getElementById('historyContent');
+        window.currentExportData = dataToUse;
+        if (dataToUse.length === 0) content.innerHTML = `<div style="text-align:center; padding: 16px;">No records.</div>`;
+        else {
+            let html = `<div style="overflow-x: auto;"><table class="dash-table"><thead><tr>
+                <th style="white-space: nowrap;">Reported Timestamp</th>
+                <th>Asset Code</th>
+                <th>Terminal</th>
+                <th>Package</th>
+                <th>Media Type</th>
+                <th>Issue Type</th>
+                <th>Issue Description</th>
+                <th>Reported By</th>
+                <th>Current Status</th>
+                <th>Ticket ID</th>
+                <th style="white-space: nowrap;">Closed Timestamp</th>
+                <th>Closed By</th>
+                <th style="white-space: nowrap;">Closure Duration</th>
+            </tr></thead><tbody>`;
+            [...dataToUse].reverse().forEach(row => {
+                html += `<tr>
+                    <td style="white-space: nowrap;">${new Date(row.Reported_Timestamp).toLocaleString()}</td>
+                    <td><b>${row.Asset_Code || ''}</b></td>
+                    <td>${row.Terminal || ''}</td>
+                    <td>${row.Package || ''}</td>
+                    <td>${row.Media_Type || ''}</td>
+                    <td>${row.Issue_Type || ''}</td>
+                    <td>${row.Issue_Description || ''}</td>
+                    <td>${row.Reported_By || ''}</td>
+                    <td>${row.Current_Status || ''}</td>
+                    <td>${row.Ticket_ID || ''}</td>
+                    <td style="white-space: nowrap;">${row.Closed_Timestamp ? new Date(row.Closed_Timestamp).toLocaleString() : ''}</td>
+                    <td>${row.Closed_By || ''}</td>
+                    <td style="white-space: nowrap;">${row.Closure_Duration || ''}</td>
+                </tr>`;
+            });
+            content.innerHTML = html + `</tbody></table></div>`;
+        }
+        const group = (key) => {
+            const counts = {};
+            dataToUse.forEach(i => { 
+                let val = i[key];
+                if (!val || val.toString().trim() === '') val = "No Description Provided";
+                val.split(',').forEach(v => { 
+                    const c = v.trim(); 
+                    counts[c] = (counts[c] || 0) + 1; 
+                }); 
+            });
+            return counts;
+        };
+        const colors = ['#4f46e5', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#0ea5e9'];
+        createChart('chartTerminal', 'pie', group('Terminal'), colors);
+        createChart('chartIssueType', 'bar', group('Issue_Type'), colors, true);
+        createChart('chartMedia', 'doughnut', group('Media_Type'), colors);
+        createChart('chartPackage', 'pie', group('Package'), colors);
+        createChart('chartReportedBy', 'doughnut', group('Reported_By'), colors);
+        createChart('chartDesc', 'bar', group('Issue_Description'), colors);
+
+        const timeline = {};
+        dataToUse.forEach(i => {
+            const d = new Date(i.Reported_Timestamp).toLocaleDateString();
+            if(!timeline[d]) timeline[d] = { total: 0, open: 0, closed: 0, siteOk: 0 };
+            timeline[d].total++;
+            const s = (i.Current_Status||'').toLowerCase();
+            if(s === 'closed') timeline[d].closed++;
+            else if(s === 'site ok') timeline[d].siteOk++;
+            else timeline[d].open++;
+        });
+        const sortedDates = Object.keys(timeline).sort((a,b) => new Date(a) - new Date(b));
+        if(dashboardCharts['chartTrendLine']) dashboardCharts['chartTrendLine'].destroy();
+        dashboardCharts['chartTrendLine'] = new Chart(document.getElementById('chartTrendLine').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: sortedDates,
+                datasets: [
+                    { label: 'Total', data: sortedDates.map(d => timeline[d].total), borderColor: '#4f46e5', tension: 0.3 },
+                    { label: 'Open', data: sortedDates.map(d => timeline[d].open), borderColor: '#ef4444', tension: 0.3 },
+                    { label: 'Resolved', data: sortedDates.map(d => timeline[d].closed), borderColor: '#10b981', tension: 0.3 }
+                ]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+        });
+    }
+
+    function createChart(id, type, dataObj, colors, isHorizontal = false) {
+        if(dashboardCharts[id]) dashboardCharts[id].destroy();
+        const ctx = document.getElementById(id);
+        if(!ctx) return;
+        dashboardCharts[id] = new Chart(ctx.getContext('2d'), {
+            type: type,
+            data: { labels: Object.keys(dataObj), datasets: [{ data: Object.values(dataObj), backgroundColor: colors, borderRadius: 6 }] },
+            options: {
+                indexAxis: isHorizontal ? 'y' : 'x',
+                responsive: true, maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: (type==='pie'||type==='doughnut'), position: 'right' },
+                    datalabels: { color: '#fff', formatter: v => v > 0 ? v : '' }
+                }
+            }
+        });
+    }
+
+    function showScanner(fromPopState = false) {
+        document.getElementById('qrInitial').classList.add('hidden');
+        document.getElementById('qrBox').classList.remove('hidden');
+        if (!fromPopState) history.pushState({ view: 'scanner' }, '', '#scanner');
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, (text) => {
+            const p = text.split('|');
+            document.getElementById('Asset_Code').value = p[0];
+            if(p[1]) document.getElementById('Terminal').value = p[1];
+            if(p[2]) document.getElementById('Package').value = p[2];
+            if(p[3]) document.getElementById('Media_Type').value = p[3];
+            html5QrCode.stop().then(() => {
+                document.getElementById('qrBox').classList.add('hidden');
+                document.getElementById('formBox').classList.remove('hidden');
+            });
+        }).catch(() => alert("Camera error"));
+    }
+
+    document.getElementById('monitoringForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const typeInput = document.querySelector('input[name="Issue_Type"]:checked');
+        let descValue = "";
+        
+        const customText = document.getElementById('customDescriptionText');
+        const descInput = document.querySelector('input[name="Issue_Description"]:checked');
+        
+        if (customText) {
+            descValue = customText.value.trim();
+        } else if (descInput) {
+            descValue = descInput.value;
+        }
+
+        if (!typeInput || !descValue) {
+            alert("Please select an Issue Type and provide a Specific Description.");
+            return;
+        }
+
+        const btn = document.getElementById('submitBtn'); 
+        btn.innerText = "Submitting & Sending Email...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        
+        const payload = {
+            action: 'submitAudit', 
+            Audit_Type: currentAuditType,
+            Asset_Code: document.getElementById('Asset_Code').value, 
+            Terminal: document.getElementById('Terminal').value,
+            Package: document.getElementById('Package').value, 
+            Media_Type: document.getElementById('Media_Type').value,
+            Issue_Type: typeInput.value,           
+            Issue_Description: descValue,
+            Priority: "Medium",
+            User: currentUser.name, 
+            ClientId: currentUser.clientId, 
+            photoData: currentPhotoBase64
+        };
+        
+        try {
+            const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) });
+            const resData = await response.json();
+            if (!resData.success) throw new Error(resData.error || "Submission failed");
+
+            alert("Issue reported successfully! An email notification has been sent."); 
+            resetToInitial();
+        } catch(error) {
+            console.error("Submission failed:", error);
+            alert("Oops! Something went wrong. " + (error.message || "Please try again."));
+            btn.innerText = "Submit Audit";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    });
+
+    function setIssueView(view) {
+        currentView = view;
+        document.getElementById('btnOpen').className = `sub-nav-btn ${view === 'open' ? 'active' : ''}`;
+        document.getElementById('btnClosed').className = `sub-nav-btn ${view === 'closed' ? 'active' : ''}`;
+        document.getElementById('btnSiteOk').className = `sub-nav-btn ${view === 'site ok' ? 'active' : ''}`;
+        
+        const isDashMode = !document.getElementById('dashSection').classList.contains('hidden');
+        if (!isDashMode) {
+            document.querySelectorAll('.kpi-card').forEach(c => c.classList.remove('active-kpi'));
+            if (view === 'open') document.querySelectorAll('.kpi-card')[1]?.classList.add('active-kpi');
+            else if (view === 'closed') document.querySelectorAll('.kpi-card')[2]?.classList.add('active-kpi');
+            else if (view === 'site ok') document.querySelectorAll('.kpi-card')[3]?.classList.add('active-kpi');
+        }
+        
+        renderIssueList();
+    }
+
+    function renderIssueList() {
+        const list = document.getElementById('issueList');
+        let baseData = globalFilteredData.length > 0 || rawData.length > 0 ? (globalFilteredData.length > 0 ? globalFilteredData : rawData.filter(i => getAuditType(i) === currentDashCategory)) : [];
+        let filtered = baseData.filter(i => {
+            const s = (i.Current_Status || "").toLowerCase();
+            let matchesView = false;
+            if (currentView === 'open') matchesView = s !== 'closed' && s !== 'site ok';
+            else if (currentView === 'closed') matchesView = s === 'closed';
+            else if (currentView === 'site ok') matchesView = s === 'site ok';
+            return matchesView;
+        });
+        filtered.reverse();
+        list.innerHTML = filtered.map(i => {
+            const statusLower = (i.Current_Status || "").toLowerCase();
+            const isClosed = statusLower === 'closed';
+            const isSiteOk = statusLower === 'site ok';
+            return `<div class="issue-card">
+                <div class="issue-header">
+                    <div class="issue-title-group">
+                        <span class="issue-title">${i.Ticket_ID} - ${i.Asset_Code}</span>
+                        <span class="issue-subtitle">${i.Terminal}</span>
+                    </div>
+                    <span class="badge ${isSiteOk ? 'badge-siteok' : (isClosed ? 'badge-closed' : 'badge-open')}">${i.Current_Status}</span>
+                </div>
+                <div class="issue-body">
+                    <b>Category:</b> <span style="color:var(--primary-blue); font-weight:600;">${getAuditType(i)}</span><br>
+                    <b>Type:</b> ${i.Issue_Type}<br>
+                    <b>Reported By:</b> ${i.Reported_By}<br>
+                    ${isClosed ? `<b>Closed By:</b> ${i.Closed_By || 'N/A'}<br>` : ''}
+                    <span style="color:var(--text-muted);"><b>Desc:</b> ${i.Issue_Description || 'N/A'}</span><br>
+                    ${isClosed && i.Remarks ? `<span style="color:var(--text-muted);"><b>Remarks:</b> ${i.Remarks}</span>` : ''}
+                    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+                        ${i.Photo_URL ? `<a class="photo-link" onclick="showBigImage('${i.Photo_URL}')">Issue Photo</a>` : ''}
+                        ${isClosed && i.Closure_Photo_URL ? `<a class="photo-link" style="background:#ecfdf5; color:#059669;" onclick="showBigImage('${i.Closure_Photo_URL}')">Fix Photo</a>` : ''}
+                    </div>
+                </div>
+                <div class="issue-meta">
+                    ${!isSiteOk ? `<span><b>${isClosed ? 'Duration:' : 'Age:'}</b> ${isClosed ? i.Closure_Duration : getPendingTime(i.Reported_Timestamp)}</span>` : ''}
+                    <span><b>Reported:</b> ${new Date(i.Reported_Timestamp).toLocaleDateString()}</span>
+                </div>
+                ${(!isClosed && !isSiteOk) ? `
+                <div style="margin-top:9.6px;">
+                    <button onclick="toggleResolveBox(${i.rowId})" class="btn-secondary" style="width:100%; padding:6.4px; font-size:9.6px; border-color: var(--success-green); color: var(--success-green);">RESOLVE TICKET</button>
+                    <div id="resolve-box-${i.rowId}" style="display:none; margin-top: 9.6px; padding: 12.8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6.4px;">
+                        <label style="font-size:9.6px; margin-bottom:3.2px; margin-top:0;">Closing Remarks</label>
+                        <textarea id="remarks-${i.rowId}" placeholder="Enter resolution remarks..." style="width:100%; padding:6.4px; border:1px solid #cbd5e1; border-radius:3.2px; margin-bottom:9.6px; font-family:inherit; font-size:10.4px; resize:vertical; min-height:48px; box-sizing:border-box;"></textarea>
+                        
+                        <label style="font-size:9.6px; margin-bottom:3.2px;">Proof of Resolution (Optional if remarks provided)</label>
+                        <input type="file" id="close-photo-${i.rowId}" accept="image/*" capture="environment" style="display:block; margin-bottom:12.8px; font-size:9.6px; width:100%;">
+                        
+                        <div style="display:flex; gap:6.4px;">
+                            <button onclick="submitClose(${i.rowId})" class="btn-success" style="flex:1; padding:6.4px; font-size:9.6px;" id="btn-submit-${i.rowId}">Submit</button>
+                            <button onclick="toggleResolveBox(${i.rowId})" class="btn-secondary" style="flex:1; padding:6.4px; font-size:9.6px;">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+            </div>`;
+        }).join('') || `<div style="text-align:center; padding:32px;">No records.</div>`;
+    }
+
+    function toggleResolveBox(id) {
+        const box = document.getElementById(`resolve-box-${id}`);
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    }
+
+    async function submitClose(id) {
+        const remarksInput = document.getElementById(`remarks-${id}`).value.trim();
+        const fileInput = document.getElementById(`close-photo-${id}`);
+        const file = fileInput.files[0];
+
+        if (!remarksInput && !file) {
+            alert("Please provide either closing remarks or upload a photo to resolve this ticket.");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to resolve this ticket?")) return;
+
+        const btn = document.getElementById(`btn-submit-${id}`);
+        btn.innerText = "Resolving...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+
+        const processSubmission = async (base64Data) => {
+            try {
+                const response = await fetch(scriptURL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ 
+                        action: 'updateStatus', 
+                        rowId: id, 
+                        clientId: currentUser.clientId, 
+                        closedBy: currentUser.name, 
+                        remarks: remarksInput,
+                        photoData: base64Data 
+                    }) 
+                });
+                
+                const resData = await response.json();
+                if (!resData.success) throw new Error(resData.error || "Server rejected request");
+
+                alert("Ticket Resolved Successfully!"); 
+                refreshData('close');
+            } catch (err) {
+                console.error("Resolution Error:", err);
+                alert("Failed to resolve ticket. " + (err.message || "Please try again."));
+                btn.innerText = "Submit";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            }
+        };
+
+        if (file) {
+            compressImage(file, 1024, 1024, 0.7, processSubmission);
+        } else {
+            processSubmission("");
+        }
+    }
+
+    function showPortalSelection(fromPopState = false) {
+        document.getElementById('portalSelectionSection').classList.remove('hidden');
+        document.getElementById('masterSplitWrapper').style.display = 'none';
+        document.getElementById('topHeader').classList.add('hidden');
+        if(config && config.logoUrl) document.getElementById('portalLogo').src = config.logoUrl;
+        
+        if (!fromPopState) {
+            history.pushState({ view: 'portals' }, '', '#portals');
+        }
+    }
+
+    function selectPortal(type, isReload = false, fromPopState = false) {
+        currentAuditType = type;
+        currentListCategory = type;
+        currentDashCategory = type;
+        localStorage.setItem('qrl_portal', type);
+
+        if (!isReload && !fromPopState) {
+            history.pushState({ view: 'main', tab: 'report', portal: type }, '', '#report');
+        }
+
+        document.getElementById('portalSelectionSection').classList.add('hidden');
+        document.getElementById('masterSplitWrapper').style.display = 'flex';
+        document.getElementById('topHeader').classList.remove('hidden');
+        document.getElementById('mainSidebar').classList.remove('hidden'); 
+        
+        document.getElementById('clientPortalName').innerText = type + (type === 'Attendance' ? '' : ' Portal');
+        
+        if (type === 'Attendance') {
+            document.getElementById('menuReport').style.display = 'none';
+            document.getElementById('menuClose').style.display = 'none';
+            document.getElementById('menuDash').style.display = 'none';
+            switchTab('attendance');
+            initAttendanceStatus();
+            return;
+        } else {
+            document.getElementById('menuReport').style.display = 'flex';
+            applyRoleAccess();
+            
+            const ageFilterContainer = document.getElementById('issueAgeFilterContainer');
+            if (ageFilterContainer) {
+                ageFilterContainer.style.display = (type === 'Operations') ? 'block' : 'none';
+            }
+            
+            document.getElementById('auditTitle').innerText = type + ' Verification';
+            
+            const typeBox = document.getElementById('dynamicIssueTypes');
+            const descBox = document.getElementById('dynamicIssueDesc');
+            typeBox.innerHTML = ''; 
+            descBox.innerHTML = ''; 
+            
+            dynamicIssueMapping = fullAuditMapping[currentAuditType] || {};
+            Object.keys(dynamicIssueMapping).forEach(t => {
+                typeBox.innerHTML += `<label class="checkbox-item"><input type="radio" name="Issue_Type" value="${t}" onchange="populateDescriptions('${t}')">${t}</label>`;
+            });
+
+            if (!isReload) {
+                switchTab('report');
+            } else {
+                const lastSec = sessionStorage.getItem('qrl_section') || 'report';
+                if(lastSec === 'attendance') switchTab('report');
+                else switchTab(lastSec);
+            }
+        }
+    }
+
+    function resetToInitial() { location.reload(); }
+    function skipQR() { document.querySelectorAll('#formBox input').forEach(i => i.readOnly = false); document.getElementById('qrInitial').classList.add('hidden'); document.getElementById('formBox').classList.remove('hidden'); }
+    function cancelScanner(fromPopState = false) { 
+        if (!fromPopState && history.state && history.state.view === 'scanner') {
+            history.back();
+            return;
+        }
+        if(html5QrCode) html5QrCode.stop(); 
+        document.getElementById('qrBox').classList.add('hidden'); 
+        document.getElementById('qrInitial').classList.remove('hidden'); 
+    }
+
+    let attendanceQrScanner = null;
+    let attendanceContextType = 'IN';
+
+    async function initAttendanceStatus() {
+        document.getElementById('attActionBox').style.display = 'none';
+        document.getElementById('attSummaryBox').classList.add('hidden');
+        document.getElementById('attendanceInitial').classList.remove('hidden');
+        document.getElementById('attendanceQrBox').classList.add('hidden');
+        document.getElementById('attendanceConfirmBox').classList.add('hidden');
+        document.getElementById('attLoadingBox').style.display = 'block';
+        document.getElementById('attMainSub').innerText = "Please wait, checking status...";
+
+        if (currentUser.role === 'Manager') {
+            document.getElementById('mgrAttBtnBox').classList.remove('hidden');
+        } else {
+            document.getElementById('mgrAttBtnBox').classList.add('hidden');
+        }
+        
+        try {
+            const now = new Date();
+            const today = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
+            const url = `${scriptURL}?action=checkAttendance&userId=${currentUser.name}&date=${today}`;
+            const response = await fetch(url);
+            const res = await response.json();
+            
+            document.getElementById('attLoadingBox').style.display = 'none';
+            
+            if (res.status === 'PENDING_IN') {
+                attendanceContextType = 'IN';
+                document.getElementById('attMainSub').innerText = "Scan the QR code to mark your IN Time.";
+                document.getElementById('attScanBtn').innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4.8px; vertical-align: middle;"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg> Mark IN Time`;
+                document.getElementById('attActionBox').style.display = 'flex';
+                document.getElementById('attSummaryBox').classList.add('hidden');
+            } else if (res.status === 'PENDING_OUT') {
+                attendanceContextType = 'OUT';
+                document.getElementById('attMainSub').innerText = "Scan the QR code to mark your OUT Time.";
+                document.getElementById('attScanBtn').innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4.8px; vertical-align: middle;"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg> Mark OUT Time`;
+                document.getElementById('attActionBox').style.display = 'flex';
+                showAttendanceSummary(res.details);
+            } else {
+                document.getElementById('attMainSub').innerText = "Attendance completed for today.";
+                document.getElementById('attActionBox').style.display = 'none';
+                showAttendanceSummary(res.details);
+            }
+        } catch(e) {
+            document.getElementById('attLoadingBox').style.display = 'none';
+            document.getElementById('attMainSub').innerText = "Error loading status.";
+        }
+    }
+
+    function showAttendanceSummary(details) {
+        if (!details) return;
+        document.getElementById('sumName').innerText = details.name || currentUser.name;
+        document.getElementById('sumDate').innerText = details.date;
+        document.getElementById('sumIn').innerText = details.inTime || '--';
+        document.getElementById('sumOut').innerText = details.outTime || '--';
+        document.getElementById('attSummaryBox').classList.remove('hidden');
+    }
+
+    function showAttendanceScanner(fromPopState = false) {
+        document.getElementById('attendanceInitial').classList.add('hidden');
+        document.getElementById('attendanceQrBox').classList.remove('hidden');
+        if (!fromPopState) history.pushState({ view: 'scanner' }, '', '#scanner');
+        attendanceQrScanner = new Html5Qrcode("attendanceReader");
+        attendanceQrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, (text) => {
+            attendanceQrScanner.stop().then(() => {
+                document.getElementById('attendanceQrBox').classList.add('hidden');
+                
+                document.getElementById('attConfirmTitle').innerText = `Confirm ${attendanceContextType} Time`;
+                document.getElementById('attQrId').value = text;
+                document.getElementById('attEmpName').innerText = currentUser.name;
+                const now = new Date();
+                document.getElementById('attDate').innerText = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
+                document.getElementById('attTime').innerText = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit' });
+                
+                document.getElementById('attendanceConfirmBox').classList.remove('hidden');
+            });
+        }).catch(() => alert("Camera error or permission denied."));
+    }
+
+    function cancelAttendanceScanner(fromPopState = false) {
+        if (!fromPopState && history.state && history.state.view === 'scanner') {
+            history.back();
+            return;
+        }
+        if(attendanceQrScanner) {
+            try { attendanceQrScanner.stop(); } catch(e){}
+        }
+        document.getElementById('attendanceQrBox').classList.add('hidden');
+        document.getElementById('attendanceConfirmBox').classList.add('hidden');
+        document.getElementById('attendanceInitial').classList.remove('hidden');
+    }
+
+    async function submitAttendance() {
+        const btn = document.getElementById('attSubmitBtn');
+        btn.innerText = "Submitting...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        
+        const now = new Date();
+        const payload = {
+            action: 'markAttendance',
+            userId: currentUser.name,
+            employeeName: currentUser.name,
+            clientId: currentUser.clientId,
+            date: now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }),
+            time: now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit' }),
+            day: now.toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', weekday: 'long' }),
+            qrId: document.getElementById('attQrId').value,
+            type: attendanceContextType
+        };
+        
+        try {
+            const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) });
+            const resData = await response.json();
+            if (!resData.success) throw new Error(resData.message || "Submission failed");
+
+            alert(`${attendanceContextType} Time marked successfully!`); 
+            cancelAttendanceScanner();
+            initAttendanceStatus();
+        } catch(error) {
+            console.error("Submission failed:", error);
+            alert(error.message || "Failed to mark attendance.");
+        } finally {
+            btn.innerText = "Mark Attendance";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    }
+
+    // --- ATTENDANCE REPORT LOGIC ---
+
+    let attRawData = [];
+    let attChartInstance = null;
+
+    flatpickr("#attFilterDate", {
+        dateFormat: "d/m/Y",
+        onChange: function() {
+            renderAttendanceReport();
+        }
+    });
+
+    async function loadAttendanceData() {
+        document.getElementById('attReportTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px;">Loading data...</td></tr>';
+        try {
+            const resp = await fetch(`${scriptURL}?action=getAllAttendance`);
+            attRawData = await resp.json();
+            renderAttendanceReport();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('attReportTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: red;">Error loading data.</td></tr>';
+        }
+    }
+
+    function renderAttendanceReport() {
+        const dateFilter = document.getElementById('attFilterDate').value;
+        const userFilter = document.getElementById('attFilterUser').value.toLowerCase();
+
+        let filtered = attRawData;
+
+        if (dateFilter) {
+            filtered = filtered.filter(r => r.date === dateFilter);
+        }
+        if (userFilter) {
+            filtered = filtered.filter(r => (r.name || r.userId).toLowerCase().includes(userFilter));
+        }
+
+        const tbody = document.getElementById('attReportTableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px;">No attendance records found.</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(r => `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 12.8px; font-size: 10.4px;">${r.name || r.userId}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px;">${r.date}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px; font-weight: 500;">${r.inTime || '--'}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px; font-weight: 500;">${r.outTime || '--'}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px;">
+                        <span style="background: ${r.inTime ? 'var(--success-green)' : 'var(--danger-red)'}; color: white; padding: 3.2px 6.4px; border-radius: 3.2px; font-size: 8.8px;">
+                            ${r.inTime ? 'Present' : 'Absent'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        updateAttendanceChart(filtered);
+    }
+
+    function updateAttendanceChart(data) {
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+        
+        // Group by Date for Present count
+        const dateCounts = {};
+        data.forEach(r => {
+            if (r.inTime) {
+                if (!dateCounts[r.date]) dateCounts[r.date] = new Set();
+                dateCounts[r.date].add(r.userId);
+            }
+        });
+
+        const labels = Object.keys(dateCounts).sort((a,b) => {
+            let [d1, m1, y1] = a.split('/');
+            let [d2, m2, y2] = b.split('/');
+            return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
+        });
+        const presentData = labels.map(d => dateCounts[d].size);
+
+        if (attChartInstance) attChartInstance.destroy();
+
+        attChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Present',
+                    data: presentData,
+                    backgroundColor: '#4f46e5',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                },
+                plugins: {
+                    legend: { display: true },
+                    datalabels: {
+                        color: '#fff',
+                        font: { weight: 'bold' }
+                    }
+                }
+            }
+        });
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        
+        // Mobile splash screen logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const splash = document.getElementById('mobileSplash');
+            if (splash && window.innerWidth <= 680) {
+                splash.style.display = 'flex';
+                setTimeout(() => {
+                    splash.style.opacity = '0';
+                    setTimeout(() => { splash.style.display = 'none'; }, 500);
+                }, 2000);
+            } else if (splash) {
+                splash.style.display = 'none';
+            }
+        });
+    }
+
+</script>
+</div>
+</div>
+</body>
+</html>

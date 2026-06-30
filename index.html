@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QRAnalytics — Scan. Report. Resolve.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A1628;
+    --ink-soft:#13233f;
+    --blue:#0056D2;
+    --cyan:#00B4D8;
+    --tape:#FFD60A;
+    --paper:#F0F4FF;
+    --paper-dim:#dbe4f5;
+    --green:#10B981;
+    --line: rgba(10,22,40,0.12);
+    --line-dark: rgba(240,244,255,0.14);
+    --shadow: 0 12px 28px rgba(10,22,40,0.14);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--tape);color:var(--ink);}
+
+  h1,h2,h3{
+    font-family:'Fraunces',serif;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{
+    font-family:'JetBrains Mono',monospace;
+  }
+  a{color:inherit;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+  @media(max-width:640px){.wrap{padding:0 20px;}}
+
+  /* ---------- Texture: dotted grid background ---------- */
+  .grid-bg{
+    background-image: radial-gradient(circle, rgba(10,22,40,0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .grid-bg-dark{
+    background-image: radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  /* ---------- Nav ---------- */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(240,244,255,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:16px 32px;max-width:1180px;margin:0 auto;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Fraunces',serif;font-weight:700;font-size:20px;
+    text-decoration:none;color:var(--ink);
+  }
+  .brand .dot{
+    width:10px;height:10px;border-radius:2px;background:var(--blue);
+    box-shadow: 4px 0 0 var(--cyan), 0 4px 0 var(--tape), 4px 4px 0 var(--ink);
+  }
+  nav.links{display:flex;gap:28px;font-size:14px;font-weight:600;}
+  nav.links a{text-decoration:none;opacity:0.75;transition:opacity .15s;}
+  nav.links a:hover{opacity:1;}
+  .nav-cta{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--ink);color:var(--paper);
+    padding:10px 18px;border-radius:100px;
+    font-size:13px;font-weight:700;text-decoration:none;
+    font-family:'JetBrains Mono',monospace;
+    transition:transform .15s ease, box-shadow .15s ease;
+    border:1px solid var(--ink);
+  }
+  .nav-cta:hover{transform:translateY(-2px);box-shadow:0 6px 0 var(--tape);}
+  @media(max-width:780px){nav.links{display:none;}}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    padding:88px 0 70px;
+    position:relative;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:56px;align-items:center;
+  }
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;}}
+
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    letter-spacing:0.08em;text-transform:uppercase;
+    background:var(--ink);color:var(--tape);
+    padding:7px 12px;border-radius:5px;
+    transform:rotate(-1.5deg);
+    margin-bottom:22px;
+  }
+  .eyebrow::before{content:"●";color:var(--green);font-size:10px;}
+
+  .hero h1{
+    font-size:clamp(40px,6vw,68px);
+    font-weight:900;
+    line-height:1.02;
+    color:var(--ink);
+  }
+  .hero h1 em{
+    font-style:italic;font-weight:500;color:var(--blue);
+    position:relative;
+  }
+  .hero p.lede{
+    font-size:18px;line-height:1.6;color:var(--ink-soft);
+    margin:24px 0 32px;max-width:480px;
+  }
+  .hero-actions{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+
+  .btn{
+    display:inline-flex;align-items:center;gap:10px;
+    padding:15px 26px;border-radius:10px;
+    font-weight:700;font-size:15px;text-decoration:none;
+    cursor:pointer;border:2px solid var(--ink);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{
+    background:var(--blue);color:#fff;border-color:var(--blue);
+    box-shadow:4px 4px 0 var(--ink);
+  }
+  .btn-primary:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--ink);}
+  .btn-ghost{
+    background:transparent;color:var(--ink);
+    box-shadow:4px 4px 0 var(--paper-dim);
+  }
+  .btn-ghost:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--paper-dim);}
+
+  .hero-note{
+    font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);
+    margin-top:14px;opacity:0.7;
+  }
+
+  /* ---------- QR Hero Visual: the signature element ---------- */
+  .scan-rig{
+    position:relative;
+    background:var(--ink);
+    border-radius:20px;
+    padding:30px;
+    box-shadow: var(--shadow);
+    border:2px solid var(--ink);
+  }
+  .scan-rig-head{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:18px;
+    font-family:'JetBrains Mono',monospace;
+    color:rgba(240,244,255,0.55);font-size:11px;
+  }
+  .rig-dots{display:flex;gap:6px;}
+  .rig-dots span{width:8px;height:8px;border-radius:50%;background:rgba(240,244,255,0.2);}
+
+  .qr-stage{
+    position:relative;
+    aspect-ratio:1/1;
+    background:#fff;
+    border-radius:12px;
+    display:grid;
+    grid-template-columns:repeat(9,1fr);
+    grid-template-rows:repeat(9,1fr);
+    gap:3px;
+    padding:18px;
+    overflow:hidden;
+  }
+  .qr-cell{
+    background:var(--ink);
+    border-radius:1px;
+    opacity:0;
+    animation: cellIn .4s ease forwards;
+    animation-delay: calc(var(--d) * 18ms);
+  }
+  .qr-cell.off{background:transparent;animation:none;opacity:1;}
+  @keyframes cellIn{
+    from{opacity:0;transform:scale(0.3);}
+    to{opacity:1;transform:scale(1);}
+  }
+  .qr-cell.pulse{
+    animation: cellIn .4s ease forwards calc(var(--d) * 18ms), pulseColor 2.6s ease-in-out 2.2s infinite;
+  }
+  @keyframes pulseColor{
+    0%,100%{background:var(--ink);}
+    50%{background:var(--cyan);}
+  }
+
+  .scan-line{
+    position:absolute;left:18px;right:18px;height:3px;
+    background:linear-gradient(90deg, transparent, var(--cyan), var(--tape), var(--cyan), transparent);
+    box-shadow:0 0 16px 2px var(--cyan);
+    top:18px;
+    animation: scanMove 2.6s cubic-bezier(.6,0,.4,1) infinite;
+    animation-delay: 1.6s;
+    opacity:0;
+  }
+  @keyframes scanMove{
+    0%{top:18px;opacity:0;}
+    8%{opacity:1;}
+    50%{top:calc(100% - 21px);opacity:1;}
+    58%{opacity:0;}
+    100%{top:18px;opacity:0;}
+  }
+
+  .scan-result{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:18px;
+    background:rgba(16,185,129,0.12);
+    border:1px solid rgba(16,185,129,0.4);
+    border-radius:10px;padding:12px 16px;
+    opacity:0;
+    animation: resultIn .5s ease forwards;
+    animation-delay:2.5s;
+  }
+  @keyframes resultIn{
+    from{opacity:0;transform:translateY(8px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+  .scan-result .tag{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    color:var(--green);display:flex;align-items:center;gap:8px;
+  }
+  .scan-result .tag::before{content:"✓";background:var(--green);color:var(--ink);
+    width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;}
+  .scan-result .ticket-id{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(240,244,255,0.5);
+  }
+
+  /* ---------- Marquee strip ---------- */
+  .marquee{
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    background:var(--ink);overflow:hidden;padding:14px 0;
+  }
+  .marquee-track{
+    display:flex;gap:48px;white-space:nowrap;
+    animation:scrollLeft 26s linear infinite;
+    width:max-content;
+  }
+  @keyframes scrollLeft{
+    from{transform:translateX(0);}
+    to{transform:translateX(-50%);}
+  }
+  .marquee-track span{
+    font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;
+    color:rgba(240,244,255,0.6);letter-spacing:0.04em;
+    display:inline-flex;align-items:center;gap:48px;
+  }
+  .marquee-track span b{color:var(--tape);font-weight:700;}
+
+  /* ---------- Section shells ---------- */
+  section{padding:100px 0;}
+  .section-tag{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    letter-spacing:0.1em;text-transform:uppercase;color:var(--blue);
+    margin-bottom:14px;display:block;
+  }
+  .section-head{max-width:640px;margin-bottom:56px;}
+  .section-head h2{font-size:clamp(30px,4vw,44px);font-weight:700;line-height:1.1;}
+  .section-head p{font-size:16px;color:var(--ink-soft);margin-top:16px;line-height:1.6;}
+
+  /* ---------- Problem cards ---------- */
+  .problem-grid{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:20px;
+  }
+  @media(max-width:900px){.problem-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:560px){.problem-grid{grid-template-columns:1fr;}}
+  .problem-card{
+    background:#fff;border:2px solid var(--ink);border-radius:14px;
+    padding:24px;position:relative;
+    box-shadow:5px 5px 0 var(--paper-dim);
+    transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .problem-card:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--tape);}
+  .problem-card .stub{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    color:#fff;background:var(--ink);display:inline-block;
+    padding:3px 8px;border-radius:4px;margin-bottom:14px;
+  }
+  .problem-card h3{font-size:18px;font-weight:700;margin-bottom:8px;}
+  .problem-card p{font-size:14px;color:var(--ink-soft);line-height:1.55;margin:0;}
+
+  /* ---------- Feature ticket stack ---------- */
+  .ticket-stack{display:flex;flex-direction:column;gap:14px;}
+  .ticket{
+    display:grid;grid-template-columns:140px 1fr 110px;gap:20px;align-items:center;
+    background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:20px 26px;
+    position:relative;
+  }
+  .ticket::before{
+    content:"";position:absolute;left:140px;top:0;bottom:0;
+    border-left:2px dashed var(--paper-dim);
+  }
+  @media(max-width:760px){
+    .ticket{grid-template-columns:1fr;gap:10px;}
+    .ticket::before{display:none;}
+  }
+  .ticket .tnum{
+    font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--blue);font-size:13px;
+  }
+  .ticket .tnum span{display:block;color:var(--ink);font-size:16px;font-family:'Fraunces',serif;font-weight:700;margin-top:4px;}
+  .ticket .tbody h4{font-family:'Fraunces',serif;font-size:17px;font-weight:700;margin-bottom:6px;}
+  .ticket .tbody p{font-size:14px;color:var(--ink-soft);margin:0;line-height:1.55;}
+  .badge{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    padding:6px 12px;border-radius:100px;text-align:center;justify-self:end;
+    letter-spacing:0.02em;
+  }
+  .badge.open{background:rgba(245,158,11,0.15);color:#B45309;}
+  .badge.closed{background:rgba(16,185,129,0.15);color:#047857;}
+  .badge.ok{background:rgba(0,180,216,0.15);color:#0E7490;}
+  @media(max-width:760px){.badge{justify-self:start;}}
+
+  /* ---------- Stats dark band ---------- */
+  .stats-band{
+    background:var(--ink);color:var(--paper);
+  }
+  .stats-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:28px;
+  }
+  @media(max-width:760px){.stats-grid{grid-template-columns:1fr;}}
+  .stat-card{
+    border:1px solid var(--line-dark);border-radius:16px;padding:32px 28px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+  }
+  .stat-card .num{
+    font-family:'Fraunces',serif;font-weight:900;font-size:56px;
+    background:linear-gradient(90deg,var(--cyan),var(--tape));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    line-height:1;
+  }
+  .stat-card p{font-size:14px;color:rgba(240,244,255,0.65);margin-top:12px;line-height:1.5;}
+
+  /* ---------- Pricing ---------- */
+  .price-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch;
+  }
+  @media(max-width:900px){.price-grid{grid-template-columns:1fr;}}
+  .price-card{
+    background:#fff;border:2px solid var(--ink);border-radius:16px;
+    padding:30px 28px;display:flex;flex-direction:column;
+    position:relative;
+  }
+  .price-card.popular{
+    background:var(--ink);color:var(--paper);
+    transform:scale(1.04);
+    box-shadow:0 20px 40px rgba(10,22,40,0.25);
+  }
+  @media(max-width:900px){.price-card.popular{transform:none;}}
+  .price-card .pop-flag{
+    position:absolute;top:-14px;left:28px;
+    background:var(--tape);color:var(--ink);
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    padding:5px 12px;border-radius:100px;border:2px solid var(--ink);
+  }
+  .price-card .tier-range{
+    font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;
+    display:inline-block;padding:5px 10px;border-radius:6px;margin-bottom:18px;
+    background:var(--paper-dim);color:var(--ink);width:fit-content;
+  }
+  .price-card.popular .tier-range{background:rgba(255,255,255,0.1);color:var(--cyan);}
+  .price-card h3{font-size:22px;font-weight:700;margin-bottom:4px;}
+  .price-card .price{
+    font-family:'Fraunces',serif;font-weight:900;font-size:42px;margin:14px 0 2px;
+  }
+  .price-card .price .period{font-family:'Inter',sans-serif;font-size:14px;font-weight:500;opacity:0.55;}
+  .price-card ul{list-style:none;padding:0;margin:22px 0 26px;display:flex;flex-direction:column;gap:11px;flex:1;}
+  .price-card li{
+    font-size:13.5px;display:flex;gap:10px;align-items:flex-start;line-height:1.4;
+  }
+  .price-card li::before{content:"✓";color:var(--green);font-weight:700;flex-shrink:0;}
+  .price-card .btn{width:100%;justify-content:center;margin-top:auto;}
+
+  /* ---------- Deck CTA panel ---------- */
+  .deck-panel{
+    background: var(--paper-dim);
+    border:2px solid var(--ink);
+    border-radius:20px;
+    padding:46px;
+    display:grid;grid-template-columns:auto 1fr auto;gap:32px;align-items:center;
+    position:relative;
+    overflow:hidden;
+  }
+  @media(max-width:760px){.deck-panel{grid-template-columns:1fr;text-align:center;}}
+  .deck-icon{
+    width:74px;height:74px;border-radius:16px;background:var(--ink);
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    box-shadow:5px 5px 0 var(--tape);
+  }
+  @media(max-width:760px){.deck-icon{margin:0 auto;}}
+  .deck-icon svg{width:34px;height:34px;}
+  .deck-copy h3{font-size:22px;font-weight:700;margin-bottom:8px;}
+  .deck-copy p{font-size:14.5px;color:var(--ink-soft);margin:0;line-height:1.5;}
+  .deck-copy .mono-tag{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue);
+    margin-top:10px;display:block;font-weight:700;
+  }
+
+  /* ---------- Contact form ---------- */
+  .contact-panel{
+    background:#fff;border:2px solid var(--ink);border-radius:20px;
+    overflow:hidden;
+    display:grid;grid-template-columns:0.85fr 1.15fr;
+  }
+  @media(max-width:840px){.contact-panel{grid-template-columns:1fr;}}
+
+  .contact-side{
+    background:var(--ink);color:var(--paper);
+    padding:46px 40px;
+    position:relative;
+    display:flex;flex-direction:column;
+  }
+  .contact-side .section-tag{color:var(--cyan);}
+  .contact-side h2{color:#fff;font-size:30px;margin-bottom:14px;}
+  .contact-side p{font-size:14.5px;color:rgba(240,244,255,0.62);line-height:1.6;margin:0 0 28px;}
+  .contact-meta{
+    margin-top:auto;display:flex;flex-direction:column;gap:14px;
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    border-top:1px solid var(--line-dark);padding-top:22px;
+  }
+  .contact-meta div{display:flex;align-items:center;gap:10px;color:rgba(240,244,255,0.7);}
+  .contact-meta div b{color:var(--tape);}
+
+  .contact-form{padding:46px 44px;}
+  @media(max-width:640px){.contact-form{padding:34px 24px;}}
+  .form-row{
+    display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;
+  }
+  @media(max-width:560px){.form-row{grid-template-columns:1fr;gap:18px;}}
+  .field{display:flex;flex-direction:column;gap:7px;}
+  .field.full{grid-column:1/-1;}
+  .field label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-soft);
+  }
+  .field input, .field textarea{
+    font-family:'Inter',sans-serif;font-size:14.5px;color:var(--ink);
+    border:1.5px solid var(--paper-dim);border-radius:9px;
+    padding:12px 14px;background:var(--paper);
+    transition:border-color .15s ease, background .15s ease;
+    resize:vertical;
+  }
+  .field input:focus, .field textarea:focus{
+    outline:none;border-color:var(--blue);background:#fff;
+  }
+  .field textarea{min-height:92px;font-family:'Inter',sans-serif;}
+
+  .form-foot{
+    display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:6px;flex-wrap:wrap;
+  }
+  .form-note{font-size:12px;color:var(--ink-soft);opacity:0.75;max-width:280px;line-height:1.5;}
+  .submit-btn{
+    border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  }
+  .submit-btn:disabled{opacity:0.6;cursor:wait;}
+
+  .form-status{
+    margin-top:16px;border-radius:10px;padding:13px 16px;
+    font-size:13.5px;font-weight:600;display:none;
+    align-items:center;gap:10px;
+  }
+  .form-status.show{display:flex;}
+  .form-status.ok{background:rgba(16,185,129,0.12);color:#047857;border:1px solid rgba(16,185,129,0.35);}
+  .form-status.err{background:rgba(239,68,68,0.1);color:#B91C1C;border:1px solid rgba(239,68,68,0.3);}
+
+
+  .cta-final{
+    background:var(--ink);color:var(--paper);text-align:center;
+    padding:110px 0;position:relative;
+  }
+  .cta-final h2{
+    font-size:clamp(34px,5.5vw,58px);font-weight:900;line-height:1.05;
+    max-width:760px;margin:0 auto;
+  }
+  .cta-final h2 .accent{color:var(--tape);font-style:italic;font-weight:500;font-family:'Fraunces',serif;}
+  .cta-final p{font-size:16px;color:rgba(240,244,255,0.6);margin:22px auto 36px;max-width:480px;}
+  .cta-final .hero-actions{justify-content:center;}
+
+  footer{
+    background:var(--ink);border-top:1px solid var(--line-dark);
+    padding:36px 0;color:rgba(240,244,255,0.5);
+  }
+  .footer-row{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+    font-size:13px;font-family:'JetBrains Mono',monospace;
+  }
+  .footer-row a{text-decoration:none;color:rgba(240,244,255,0.7);}
+  .footer-row a:hover{color:var(--cyan);}
+
+  /* ---------- Reveal on scroll ---------- */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease, transform .6s ease;}
+  .reveal.in{opacity:1;transform:translateY(0);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;scroll-behavior:auto !important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <a href="#top" class="brand"><span class="dot"></span> QRAnalytics</a>
+    <nav class="links">
+      <a href="#problem">Problem</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+      <a href="#deck">Deck</a>
+      <a href="tool.html">Product Demo</a>
+    </nav>
+    <a class="nav-cta" href="#deck">↓ get the deck</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HERO -->
+  <section class="hero grid-bg" style="padding-top:64px;">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">now scanning your operations</span>
+        <h1>Stop chasing<br>issues. Start<br><em>scanning</em> them.</h1>
+        <p class="lede">QRAnalytics turns every asset into a checkpoint. Staff scan, issues log themselves, and your dashboard fills up while you drink your coffee.</p>
+        <div class="hero-actions">
+          <a href="#deck" class="btn btn-primary">Get the pitch deck →</a>
+          <a href="tool.html" class="btn btn-ghost">Product Demo</a>
+          <a href="#how" class="btn btn-ghost">See how it works</a>
+        </div>
+        <div class="hero-note">// zero app installs · works on any browser · live in 48 hrs</div>
+      </div>
+
+      <div class="scan-rig" id="scanRig">
+        <div class="scan-rig-head">
+          <span>qr-terminal.live</span>
+          <div class="rig-dots"><span></span><span></span><span></span></div>
+        </div>
+        <div class="qr-stage" id="qrStage"></div>
+        <div class="scan-result">
+          <span class="tag">ISSUE LOGGED</span>
+          <span class="ticket-id">TCKT-2291 · 0:09</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <div class="marquee">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+  <!-- PROBLEM -->
+  <section id="problem" class="wrap">
+    <div class="section-head reveal">
+      <span class="section-tag">/// the problem</span>
+      <h2>Your operations are talking. Nobody's listening.</h2>
+      <p>Issues happen on the floor, in the terminal, on the factory line — and then they vanish into a notebook, a WhatsApp message, or thin air.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card reveal">
+        <span class="stub">CASE 01</span>
+        <h3>No accountability</h3>
+        <p>Reported verbally or on paper. No trail. No owner. No deadline.</p>
+      </div>
+      <div class="problem-card reveal">
+        <span class="stub">CASE 02</span>
+        <h3>Delayed response</h3>
+        <p>Supervisors find out when the issue has already become a disruption.</p>
+      </div>
+      <div class="problem-card reveal">
+        <span class="stub">CASE 03</span>
+        <h3>Zero visibility</h3>
+        <p>No dashboard to show what's open, aging, or resolved — right now.</p>
+      </div>
+      <div class="problem-card reveal">
+        <span class="stub">CASE 04</span>
+        <h3>Manual audits</h3>
+        <p>Spreadsheets and paper checklists. Errors, gaps, compliance risk.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how" class="wrap">
+    <div class="section-head reveal">
+      <span class="section-tag">/// how it works</span>
+      <h2>Every ticket, end to end.</h2>
+      <p>One scan starts the whole chain. Here's what an actual ticket looks like as it moves through QRAnalytics.</p>
+    </div>
+    <div class="ticket-stack">
+      <div class="ticket reveal">
+        <div class="tnum">STEP / 01<span>Scan</span></div>
+        <div class="tbody"><h4>Scan a QR code</h4><p>Staff scan an asset or location QR to instantly open a geotagged audit form — no app required.</p></div>
+        <span class="badge open">in progress</span>
+      </div>
+      <div class="ticket reveal">
+        <div class="tnum">STEP / 02<span>Log</span></div>
+        <div class="tbody"><h4>Log the issue</h4><p>Issue type, description, photo, severity — captured in under 30 seconds, right from the scene.</p></div>
+        <span class="badge open">in progress</span>
+      </div>
+      <div class="ticket reveal">
+        <div class="tnum">STEP / 03<span>Ticket</span></div>
+        <div class="tbody"><h4>Auto-generated ticket</h4><p>A unique Ticket ID is created with timestamp, reporter, and asset data attached.</p></div>
+        <span class="badge ok">site ok</span>
+      </div>
+      <div class="ticket reveal">
+        <div class="tnum">STEP / 04<span>Resolve</span></div>
+        <div class="tbody"><h4>Dashboard &amp; resolution</h4><p>Managers close tickets, track KPIs, and export the full audit log in one click.</p></div>
+        <span class="badge closed">closed</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="stats-band grid-bg-dark">
+    <div class="wrap">
+      <div class="section-head reveal" style="margin-bottom:48px;">
+        <span class="section-tag" style="color:var(--cyan);">/// the receipts</span>
+        <h2 style="color:#fff;">The ROI shows up fast.</h2>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card reveal">
+          <div class="num">80%</div>
+          <p>Reduction in unresolved issues within the first 30 days.</p>
+        </div>
+        <div class="stat-card reveal">
+          <div class="num">4×</div>
+          <p>Faster average ticket closure time vs. manual logs.</p>
+        </div>
+        <div class="stat-card reveal">
+          <div class="num">100%</div>
+          <p>Digital audit trail for compliance and accountability.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="wrap">
+    <div class="section-head reveal">
+      <span class="section-tag">/// pricing</span>
+      <h2>Priced by what you're watching.</h2>
+      <p>Pay for the devices you monitor — not per seat, not per click. Pick a tier, or talk to us about something bigger.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <span class="tier-range">UP TO 50 DEVICES</span>
+        <h3>Starter</h3>
+        <div class="price">₹9,999<span class="period"> / month</span></div>
+        <ul>
+          <li>1 portal (Ops or Quality)</li>
+          <li>Up to 5 user accounts</li>
+          <li>Live dashboard &amp; KPIs</li>
+          <li>CSV export &amp; audit logs</li>
+        </ul>
+        <a href="#deck" class="btn btn-ghost">See it in the deck</a>
+      </div>
+      <div class="price-card popular reveal">
+        <span class="pop-flag">MOST POPULAR</span>
+        <span class="tier-range">51–200 DEVICES</span>
+        <h3>Growth</h3>
+        <div class="price">₹24,999<span class="period"> / month</span></div>
+        <ul>
+          <li>Dual portals (Ops + Quality)</li>
+          <li>Up to 25 user accounts</li>
+          <li>Role-based access control</li>
+          <li>Priority chat support</li>
+        </ul>
+        <a href="#deck" class="btn btn-primary" style="border-color:var(--tape);box-shadow:4px 4px 0 var(--tape);">See it in the deck</a>
+      </div>
+      <div class="price-card reveal">
+        <span class="tier-range">200+ DEVICES</span>
+        <h3>Enterprise</h3>
+        <div class="price">Custom</div>
+        <ul>
+          <li>Unlimited portals &amp; users</li>
+          <li>Dedicated account manager</li>
+          <li>On-site onboarding</li>
+          <li>SLA-backed uptime</li>
+        </ul>
+        <a href="#deck" class="btn btn-ghost">See it in the deck</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECK DOWNLOAD -->
+  <section id="deck" class="wrap">
+    <div class="deck-panel reveal">
+      <div class="deck-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="3" width="7" height="7" rx="1" fill="#00B4D8"/>
+          <rect x="14" y="3" width="7" height="7" rx="1" fill="#FFD60A"/>
+          <rect x="3" y="14" width="7" height="7" rx="1" fill="#FFD60A"/>
+          <rect x="14" y="14" width="3" height="3" rx="0.5" fill="#00B4D8"/>
+          <rect x="18" y="14" width="3" height="3" rx="0.5" fill="#00B4D8"/>
+          <rect x="14" y="18" width="3" height="3" rx="0.5" fill="#00B4D8"/>
+          <rect x="18" y="18" width="3" height="3" rx="0.5" fill="#0056D2"/>
+        </svg>
+      </div>
+      <div class="deck-copy">
+        <h3>Read the full pitch deck</h3>
+        <p>Every slide on this page — problem, solution, dashboard mockups, pricing, and the business case — lives in the 12-slide deck below. Built for sharing straight to a CEO's inbox.</p>
+        <span class="mono-tag">QRAnalytics_PitchDeck.pptx · 12 slides</span>
+      </div>
+      <a href="QRAnalytics_PitchDeck.pptx" download class="btn btn-primary">↓ Download .pptx</a>
+    </div>
+  </section>
+
+  <!-- CONTACT / LEAD FORM -->
+  <section id="contact" class="wrap">
+    <div class="contact-panel reveal">
+      <div class="contact-side grid-bg-dark">
+        <span class="section-tag">/// open a ticket</span>
+        <h2>Talk to us directly.</h2>
+        <p>Tell us about your sites, your devices, and what's currently breaking your audit process. We'll route it to the right person and get back within one business day.</p>
+        <div class="contact-meta">
+          <div><b>→</b> Average response time: under 24 hrs</div>
+          <div><b>→</b> No spam. No sales sequences. Just a reply.</div>
+          <div><b>→</b> Prefer email? hello@qranalytics.in</div>
+        </div>
+      </div>
+
+      <form class="contact-form" id="leadForm">
+        <div class="form-row">
+          <div class="field">
+            <label for="f-name">Name</label>
+            <input type="text" id="f-name" name="name" placeholder="Your full name" required>
+          </div>
+          <div class="field">
+            <label for="f-mobile">Mobile number</label>
+            <input type="tel" id="f-mobile" name="mobile" placeholder="+91 98765 43210" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field full">
+            <label for="f-email">Email ID</label>
+            <input type="email" id="f-email" name="email" placeholder="you@company.com" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label for="f-company">Company name</label>
+            <input type="text" id="f-company" name="company" placeholder="Your company">
+          </div>
+          <div class="field">
+            <label for="f-city">City</label>
+            <input type="text" id="f-city" name="city" placeholder="Where you're based">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field full">
+            <label for="f-query">Your query</label>
+            <textarea id="f-query" name="query" placeholder="Tell us a bit about what you're looking to solve..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-foot">
+          <span class="form-note">// submitting logs this as a new lead in our system — we'll reach out shortly.</span>
+          <button type="submit" class="btn btn-primary submit-btn" id="submitBtn">Submit query →</button>
+        </div>
+
+        <div class="form-status" id="formStatus"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="cta-final grid-bg-dark">
+    <div class="wrap">
+      <h2>Your next audit is<br><span class="accent">already overdue.</span></h2>
+      <p>Start a pilot in 48 hours. No procurement marathon, no IT overhead — just a QR code and a dashboard that finally tells the truth.</p>
+      <div class="hero-actions">
+        <a href="#deck" class="btn btn-primary">Get the pitch deck →</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap footer-row">
+    <span>© 2026 QRAnalytics — Scan. Report. Resolve.</span>
+    <span><a href="mailto:hello@qranalytics.in">hello@qranalytics.in</a> · <a href="#deck">download deck</a></span>
+  </div>
+</footer>
+
+<script>
+  // Build QR-style grid (9x9), with a fixed "finder pattern" look on corners
+  (function buildQR(){
+    const stage = document.getElementById('qrStage');
+    const size = 9;
+    // crude finder-pattern-ish corners for visual authenticity
+    const finder = (r,c) => {
+      // top-left, top-right, bottom-left 3x3 blocks with ring pattern
+      const blocks = [[0,0],[0,6],[6,0]];
+      for(const [br,bc] of blocks){
+        if(r>=br && r<br+3 && c>=bc && c<bc+3){
+          const lr = r-br, lc = c-bc;
+          if(lr===1 && lc===1) return 'on';
+          if(lr===0||lr===2||lc===0||lc===2) return 'on';
+          return 'off';
+        }
+      }
+      return null;
+    };
+    let delay = 0;
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+        const f = finder(r,c);
+        const cell = document.createElement('div');
+        let isOn;
+        if(f==='on'){ isOn = true; }
+        else if(f==='off'){ isOn = false; }
+        else { isOn = Math.random() > 0.45; }
+        cell.className = 'qr-cell' + (isOn ? '' : ' off');
+        if(isOn && Math.random() > 0.85) cell.classList.add('pulse');
+        cell.style.setProperty('--d', delay);
+        stage.appendChild(cell);
+        delay++;
+      }
+    }
+  })();
+
+  // Marquee content, duplicated for seamless loop
+  (function buildMarquee(){
+    const items = [
+      'SCAN →', 'REPORT →', 'RESOLVE →', '<b>1,284</b> ISSUES TRACKED',
+      'SCAN →', 'REPORT →', 'RESOLVE →', '<b>4×</b> FASTER RESOLUTION',
+      'SCAN →', 'REPORT →', 'RESOLVE →', '<b>80%</b> FEWER OPEN TICKETS',
+    ];
+    const track = document.getElementById('marqueeTrack');
+    const html = items.map(i => `<span>${i}</span>`).join('');
+    track.innerHTML = html + html; // duplicate for seamless scroll
+  })();
+
+  // Scroll reveal
+  (function reveal(){
+    const els = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{
+        if(e.isIntersecting){ e.target.classList.add('in'); obs.unobserve(e.target); }
+      });
+    },{threshold:0.12});
+    els.forEach(el=>obs.observe(el));
+  })();
+
+  // ---------- Lead capture form -> Google Sheet ----------
+  // 1. Deploy the included AppsScript_Code.gs as a Web App (see comments in that file).
+  // 2. Paste the resulting /exec URL below.
+  const FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbyjWv9Qvi212R7orV9kFGj3QRZlb60_UyewjPBQJvqmgq4E2hZc77iNbWlQKY3Ws07V/exec";
+
+  (function leadForm(){
+    const form = document.getElementById('leadForm');
+    const btn = document.getElementById('submitBtn');
+    const status = document.getElementById('formStatus');
+
+    if(!form) return;
+
+    function showStatus(kind, msg){
+      status.textContent = msg;
+      status.className = 'form-status show ' + kind;
+    }
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+
+      if(FORM_ENDPOINT.indexOf('PASTE_YOUR_WEB_APP_URL_HERE') !== -1){
+        showStatus('err', 'Form isn\'t connected yet — deploy AppsScript_Code.gs and add the URL in index.html (see FORM_ENDPOINT).');
+        return;
+      }
+
+      const data = {
+        action: 'submitLead',
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        mobile: form.mobile.value.trim(),
+        company: form.company.value.trim(),
+        city: form.city.value.trim(),
+        query: form.query.value.trim(),
+      };
+
+      if(!data.name || !data.mobile){
+        showStatus('err', 'Please fill in your name and mobile number.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting…';
+      status.className = 'form-status';
+
+      // Apps Script web apps don't reliably return CORS headers for
+      // readable fetch responses cross-origin, so we send as a simple
+      // (no-preflight) request and treat it as fire-and-forget.
+      fetch(FORM_ENDPOINT, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data),
+      })
+      .then(function(){
+        showStatus('ok', '✓ Thanks ' + data.name.split(' ')[0] + ' — your query has been submitted. We\'ll be in touch shortly.');
+        form.reset();
+      })
+      .catch(function(){
+        showStatus('err', 'Something went wrong sending your query. Please try again or email hello@qranalytics.in directly.');
+      })
+      .finally(function(){
+        btn.disabled = false;
+        btn.textContent = 'Submit query →';
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
