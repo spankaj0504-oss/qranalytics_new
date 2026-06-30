@@ -2889,7 +2889,7 @@
     }
 
     // Mobile splash screen logic
-    document.addEventListener('DOMContentLoaded', () => {
+    (function() {
         const splash = document.getElementById('mobileSplash');
         if (splash && window.innerWidth <= 680) {
             splash.style.display = 'flex';
@@ -2900,7 +2900,7 @@
         } else if (splash) {
             splash.style.display = 'none';
         }
-    });
+    })();
 
 </script>
 </div>
