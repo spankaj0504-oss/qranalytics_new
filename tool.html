@@ -2683,6 +2683,201 @@
                 plugins: {
                     legend: { display: true },
                     datalabels: {
+                document.getElementById('attScanBtn').innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4.8px; vertical-align: middle;"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg> Mark OUT Time`;
+                document.getElementById('attActionBox').style.display = 'flex';
+                showAttendanceSummary(res.details);
+            } else {
+                document.getElementById('attMainSub').innerText = "Attendance completed for today.";
+                document.getElementById('attActionBox').style.display = 'none';
+                showAttendanceSummary(res.details);
+            }
+        } catch(e) {
+            document.getElementById('attLoadingBox').style.display = 'none';
+            document.getElementById('attMainSub').innerText = "Error loading status.";
+        }
+    }
+
+    function showAttendanceSummary(details) {
+        if (!details) return;
+        document.getElementById('sumName').innerText = details.name || currentUser.name;
+        document.getElementById('sumDate').innerText = details.date;
+        document.getElementById('sumIn').innerText = details.inTime || '--';
+        document.getElementById('sumOut').innerText = details.outTime || '--';
+        document.getElementById('attSummaryBox').classList.remove('hidden');
+    }
+
+    function showAttendanceScanner(fromPopState = false) {
+        document.getElementById('attendanceInitial').classList.add('hidden');
+        document.getElementById('attendanceQrBox').classList.remove('hidden');
+        if (!fromPopState) history.pushState({ view: 'scanner' }, '', '#scanner');
+        attendanceQrScanner = new Html5Qrcode("attendanceReader");
+        attendanceQrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, (text) => {
+            attendanceQrScanner.stop().then(() => {
+                document.getElementById('attendanceQrBox').classList.add('hidden');
+                
+                document.getElementById('attConfirmTitle').innerText = `Confirm ${attendanceContextType} Time`;
+                document.getElementById('attQrId').value = text;
+                document.getElementById('attEmpName').innerText = currentUser.name;
+                const now = new Date();
+                document.getElementById('attDate').innerText = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
+                document.getElementById('attTime').innerText = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit' });
+                
+                document.getElementById('attendanceConfirmBox').classList.remove('hidden');
+            });
+        }).catch(() => alert("Camera error or permission denied."));
+    }
+
+    function cancelAttendanceScanner(fromPopState = false) {
+        if (!fromPopState && history.state && history.state.view === 'scanner') {
+            history.back();
+            return;
+        }
+        if(attendanceQrScanner) {
+            try { attendanceQrScanner.stop(); } catch(e){}
+        }
+        document.getElementById('attendanceQrBox').classList.add('hidden');
+        document.getElementById('attendanceConfirmBox').classList.add('hidden');
+        document.getElementById('attendanceInitial').classList.remove('hidden');
+    }
+
+    async function submitAttendance() {
+        const btn = document.getElementById('attSubmitBtn');
+        btn.innerText = "Submitting...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        
+        const now = new Date();
+        const payload = {
+            action: 'markAttendance',
+            userId: currentUser.name,
+            employeeName: currentUser.name,
+            clientId: currentUser.clientId,
+            date: now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }),
+            time: now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit' }),
+            day: now.toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', weekday: 'long' }),
+            qrId: document.getElementById('attQrId').value,
+            type: attendanceContextType
+        };
+        
+        try {
+            const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) });
+            const resData = await response.json();
+            if (!resData.success) throw new Error(resData.message || "Submission failed");
+
+            alert(`${attendanceContextType} Time marked successfully!`); 
+            cancelAttendanceScanner();
+            initAttendanceStatus();
+        } catch(error) {
+            console.error("Submission failed:", error);
+            alert(error.message || "Failed to mark attendance.");
+        } finally {
+            btn.innerText = "Mark Attendance";
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    }
+
+    // --- ATTENDANCE REPORT LOGIC ---
+
+    let attRawData = [];
+    let attChartInstance = null;
+
+    flatpickr("#attFilterDate", {
+        dateFormat: "d/m/Y",
+        onChange: function() {
+            renderAttendanceReport();
+        }
+    });
+
+    async function loadAttendanceData() {
+        document.getElementById('attReportTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px;">Loading data...</td></tr>';
+        try {
+            const resp = await fetch(`${scriptURL}?action=getAllAttendance`);
+            attRawData = await resp.json();
+            renderAttendanceReport();
+        } catch (e) {
+            console.error(e);
+            document.getElementById('attReportTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: red;">Error loading data.</td></tr>';
+        }
+    }
+
+    function renderAttendanceReport() {
+        const dateFilter = document.getElementById('attFilterDate').value;
+        const userFilter = document.getElementById('attFilterUser').value.toLowerCase();
+
+        let filtered = attRawData;
+
+        if (dateFilter) {
+            filtered = filtered.filter(r => r.date === dateFilter);
+        }
+        if (userFilter) {
+            filtered = filtered.filter(r => (r.name || r.userId).toLowerCase().includes(userFilter));
+        }
+
+        const tbody = document.getElementById('attReportTableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px;">No attendance records found.</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(r => `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 12.8px; font-size: 10.4px;">${r.name || r.userId}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px;">${r.date}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px; font-weight: 500;">${r.inTime || '--'}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px; font-weight: 500;">${r.outTime || '--'}</td>
+                    <td style="padding: 12.8px; font-size: 10.4px;">
+                        <span style="background: ${r.inTime ? 'var(--success-green)' : 'var(--danger-red)'}; color: white; padding: 3.2px 6.4px; border-radius: 3.2px; font-size: 8.8px;">
+                            ${r.inTime ? 'Present' : 'Absent'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        updateAttendanceChart(filtered);
+    }
+
+    function updateAttendanceChart(data) {
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+        
+        // Group by Date for Present count
+        const dateCounts = {};
+        data.forEach(r => {
+            if (r.inTime) {
+                if (!dateCounts[r.date]) dateCounts[r.date] = new Set();
+                dateCounts[r.date].add(r.userId);
+            }
+        });
+
+        const labels = Object.keys(dateCounts).sort((a,b) => {
+            let [d1, m1, y1] = a.split('/');
+            let [d2, m2, y2] = b.split('/');
+            return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
+        });
+        const presentData = labels.map(d => dateCounts[d].size);
+
+        if (attChartInstance) attChartInstance.destroy();
+
+        attChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Total Present',
+                    data: presentData,
+                    backgroundColor: '#4f46e5',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                },
+                plugins: {
+                    legend: { display: true },
+                    datalabels: {
                         color: '#fff',
                         font: { weight: 'bold' }
                     }
@@ -2691,21 +2886,21 @@
         });
         updateDateTime();
         setInterval(updateDateTime, 60000);
-        
-        // Mobile splash screen logic
-        document.addEventListener('DOMContentLoaded', () => {
-            const splash = document.getElementById('mobileSplash');
-            if (splash && window.innerWidth <= 680) {
-                splash.style.display = 'flex';
-                setTimeout(() => {
-                    splash.style.opacity = '0';
-                    setTimeout(() => { splash.style.display = 'none'; }, 500);
-                }, 2000);
-            } else if (splash) {
-                splash.style.display = 'none';
-            }
-        });
     }
+
+    // Mobile splash screen logic
+    document.addEventListener('DOMContentLoaded', () => {
+        const splash = document.getElementById('mobileSplash');
+        if (splash && window.innerWidth <= 680) {
+            splash.style.display = 'flex';
+            setTimeout(() => {
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; }, 500);
+            }, 3000);
+        } else if (splash) {
+            splash.style.display = 'none';
+        }
+    });
 
 </script>
 </div>
