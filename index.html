@@ -949,6 +949,14 @@
             opacity: 1;
             transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
         }
+        .splash-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            text-align: center;
+        }
         #splashLogo {
             font-family: 'Outfit', sans-serif;
             font-size: 38px;
@@ -956,6 +964,7 @@
             color: #ffffff;
             letter-spacing: -0.03em;
             display: flex;
+            justify-content: center;
             gap: 1.5px;
             text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
@@ -967,6 +976,24 @@
             animation-delay: calc(var(--i) * 0.06s);
         }
         @keyframes letterReveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        #splashSubtitle {
+            font-family: 'Outfit', sans-serif;
+            font-size: 19px; /* Half of 38px */
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            letter-spacing: 0.02em;
+            opacity: 0;
+            transform: translateY(15px);
+            animation: subtitleReveal 0.8s ease-out forwards;
+            animation-delay: 1.0s;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        @keyframes subtitleReveal {
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -986,18 +1013,21 @@
 <body>
     <!-- Mobile Splash Screen -->
     <div id="splashScreen">
-        <div id="splashLogo">
-            <span style="--i:0">Q</span>
-            <span style="--i:1">R</span>
-            <span style="--i:2">A</span>
-            <span style="--i:3">n</span>
-            <span style="--i:4">a</span>
-            <span style="--i:5">l</span>
-            <span style="--i:6">y</span>
-            <span style="--i:7">t</span>
-            <span style="--i:8">i</span>
-            <span style="--i:9">c</span>
-            <span style="--i:10">s</span>
+        <div class="splash-content">
+            <div id="splashLogo">
+                <span style="--i:0">Q</span>
+                <span style="--i:1">R</span>
+                <span style="--i:2">A</span>
+                <span style="--i:3">n</span>
+                <span style="--i:4">a</span>
+                <span style="--i:5">l</span>
+                <span style="--i:6">y</span>
+                <span style="--i:7">t</span>
+                <span style="--i:8">i</span>
+                <span style="--i:9">c</span>
+                <span style="--i:10">s</span>
+            </div>
+            <div id="splashSubtitle">The Enterprise Solution</div>
         </div>
     </div>
     <script>
@@ -1007,14 +1037,14 @@
             const splash = document.getElementById('splashScreen');
             if (isMobile && !hasSession) {
                 splash.classList.add('mobile-active');
-                // Fade out after 1.5 seconds.
+                // Fade out after 2.5 seconds.
                 setTimeout(() => {
                     splash.classList.add('fade-out');
                     setTimeout(() => {
                         splash.style.display = 'none';
                         splash.classList.remove('mobile-active');
                     }, 500);
-                }, 1500);
+                }, 2500);
             } else {
                 splash.style.display = 'none';
             }
