@@ -276,31 +276,6 @@
             box-sizing: border-box !important;
         }
 
-        /* Mobile Splash Screen */
-        .mobile-splash {
-            display: none;
-        }
-        @media (max-width: 680px) {
-            .mobile-splash {
-                display: flex;
-                position: fixed;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background-color: #0A66C2; /* Blue */
-                z-index: 99999;
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-                transition: opacity 0.5s ease;
-            }
-            .mobile-splash h1 {
-                color: #ffffff;
-                font-size: 32px;
-                font-weight: 700;
-                margin: 0;
-                font-family: 'Plus Jakarta Sans', sans-serif;
-            }
-        }
-
         .enterprise-badge {
             display: inline-block;
             background: rgba(79, 70, 229, 0.1);
@@ -625,85 +600,6 @@
             .split-wrapper { flex-direction: column; }
             .side-hero { display: none; }
             
-            /* Mobile Login Redesign */
-            body:has(#loginSection:not(.hidden)) {
-                background: #f4f7fc !important;
-            }
-            #masterSplitWrapper:has(#loginSection:not(.hidden)) {
-                background: #f4f7fc !important;
-                padding: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            #masterSplitWrapper:has(#loginSection:not(.hidden))::before,
-            #masterSplitWrapper:has(#loginSection:not(.hidden))::after {
-                display: none;
-            }
-            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
-                animation: none;
-                transform: none;
-                background: transparent !important;
-                box-shadow: none !important;
-                border: none !important;
-                backdrop-filter: none;
-            }
-            #loginSection {
-                background: #e2e8f0 !important; /* light grey-blue card */
-                border-radius: 12px !important;
-                padding: 32px 24px !important;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
-                border: none !important;
-                animation: none !important;
-                max-width: 400px;
-                margin: 0 auto !important;
-            }
-            
-            /* Hide desktop login header, show mobile one */
-            .login-header-desktop { display: none !important; }
-            .login-header-mobile { display: block !important; text-align: center; margin-bottom: 24px; }
-            .login-header-mobile h1 { color: #0056D2; font-size: 24px; font-weight: 800; margin: 0 0 8px 0; }
-            .login-header-mobile p { color: #4b5563; font-size: 14px; margin: 0; }
-
-            /* Inputs */
-            .input-wrapper-mobile {
-                position: relative;
-                margin-bottom: 16px;
-            }
-            .input-wrapper-mobile svg.left-icon {
-                position: absolute;
-                left: 12px;
-                top: 50%;
-                transform: translateY(-50%);
-                color: #4b5563;
-                width: 20px;
-                height: 20px;
-                z-index: 10;
-            }
-            #masterSplitWrapper:has(#loginSection:not(.hidden)) input[type="text"],
-            #masterSplitWrapper:has(#loginSection:not(.hidden)) input[type="password"] {
-                padding-left: 40px !important;
-                border: 1px solid #94a3b8 !important;
-                background: transparent !important;
-                border-radius: 8px !important;
-                height: 48px;
-                font-size: 14px !important;
-            }
-            
-            #masterSplitWrapper:has(#loginSection:not(.hidden)) #loginBtn {
-                background: #cbd5e1 !important;
-                color: #64748b !important;
-                height: 48px;
-                font-size: 14px !important;
-                box-shadow: none !important;
-                border-radius: 8px !important;
-                margin-top: 8px;
-            }
-            
-            #loginSection .remember-me-container, #loginSection .footer-copyright {
-                display: none !important;
-            }
-            
             .brand-header-row { background: #ffffff !important; padding: env(safe-area-inset-top, 0px) 12.8px 0 12.8px; grid-template-columns: 38.4px 1fr 38.4px; }
             .brand-header-row .qrlytics-title-header { display: block; font-size: 19.2px; }
             .mobile-menu-btn { display: flex; align-items: center; justify-content: center; }
@@ -755,27 +651,155 @@
 
             .side-content { padding: 12.8px; }
             
-            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
-                flex: 1;
-                width: 100%;
-                height: auto;
-                border-radius: 12.8px;
-                max-width: 360px;
-                box-shadow: 0 16px 40px rgba(0,0,0,0.3);
-            }
             #masterSplitWrapper:has(#loginSection:not(.hidden)) {
-                padding: 16px;
+                background: #0056D2 !important; /* Solid brand blue background */
+                padding: 24px 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            #masterSplitWrapper:has(#loginSection:not(.hidden))::before,
+            #masterSplitWrapper:has(#loginSection:not(.hidden))::after {
+                display: none !important; /* Hide background grid on mobile */
+            }
+
+            #masterSplitWrapper:has(#loginSection:not(.hidden)) .side-content {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: auto !important;
+                width: 100% !important;
+                max-width: 360px !important;
+                animation: none !important;
             }
             
             #loginSection { 
-                margin-top: 5vh; 
-                width: 100%; 
-                padding: 32px 19.2px; 
-                animation: none; 
-                border-radius: var(--radius-xl);
-                box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.1), 0 6.4px 8px -4.8px rgba(0, 0, 0, 0.1);
-                border-top: 4px solid var(--brand-primary);
-                background: #ffffff;
+                margin: 0 auto !important;
+                width: 100% !important;
+                padding: 40px 24px !important;
+                animation: none !important;
+                border-radius: 36px !important; /* Very rounded corners */
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+                border: none !important; /* Remove blue border strip */
+                background: #ffffff !important;
+                box-sizing: border-box !important;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            /* Logo header styled like screenshot */
+            #loginSection h1.qrlytics-title-header {
+                font-family: 'Outfit', sans-serif !important;
+                color: #00B4D8 !important; /* Teal brand color */
+                font-weight: 800 !important;
+                font-size: 26px !important;
+                letter-spacing: 0.05em !important;
+                text-transform: uppercase !important;
+                margin-bottom: 8px !important;
+                margin-top: 0 !important;
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* "Welcome" header styled like screenshot */
+            #loginSection h2 {
+                color: #000000 !important;
+                font-size: 22px !important;
+                font-weight: 800 !important;
+                margin-bottom: 4px !important;
+                letter-spacing: -0.4px !important;
+            }
+
+            /* Subtext */
+            #loginSection p {
+                color: #64748b !important;
+                font-size: 11.5px !important;
+                margin-top: 0 !important;
+                margin-bottom: 24px !important;
+            }
+
+            /* Inputs Username & Password */
+            #loginSection input[type="text"],
+            #loginSection input[type="password"] {
+                background: #ffffff !important;
+                border: 1.2px solid #e2e8f0 !important;
+                border-radius: 10px !important;
+                padding: 12px 14px !important;
+                font-size: 13px !important;
+                margin-bottom: 14px !important;
+                color: #0f172a !important;
+                box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.01) !important;
+            }
+            #loginSection input[type="text"]::placeholder,
+            #loginSection input[type="password"]::placeholder {
+                color: #94a3b8 !important;
+                opacity: 1 !important;
+            }
+
+            /* Password eye toggle button */
+            #loginSection button[type="button"] {
+                right: 12px !important;
+                background: #ffffff !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 50% !important;
+                width: 32px !important;
+                height: 32px !important;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+                color: #64748b !important;
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            /* Remember Session Checkbox & Label */
+            #loginSection label {
+                font-size: 11px !important;
+                color: #64748b !important;
+                display: flex !important;
+                align-items: center;
+                gap: 8px !important;
+                margin-top: 4px !important;
+                margin-bottom: 24px !important;
+            }
+            #loginSection input[type="checkbox"] {
+                width: 15px !important;
+                height: 15px !important;
+                border: 1.5px solid #cbd5e1 !important;
+                border-radius: 4px !important;
+                margin: 0 !important;
+                cursor: pointer;
+            }
+
+            /* Sign In Button */
+            #loginSection #loginBtn {
+                width: 100% !important;
+                background: #0056D2 !important; /* Bold blue button color */
+                color: #ffffff !important;
+                border-radius: 10px !important;
+                padding: 12.8px !important;
+                font-weight: 700 !important;
+                font-size: 12px !important;
+                box-shadow: 0 4px 12px rgba(0, 86, 210, 0.25) !important;
+                border: none !important;
+                letter-spacing: 0.05em !important;
+                text-transform: uppercase !important;
+                display: flex !important;
+                justify-content: center;
+                align-items: center;
+            }
+
+            /* Copyright info */
+            #loginSection .login-copyright {
+                font-size: 8px !important;
+                color: #94a3b8 !important;
+                font-weight: 600 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.06em !important;
+                text-align: center !important;
+                margin-top: 24px !important;
+                padding-top: 16px !important;
             }
             .mobile-login-logo { display: block; margin: 0 auto 16px auto; height: 43.2px; object-fit: contain; }
 
@@ -909,12 +933,93 @@
             .portal-header-row > h1 { justify-self: start; font-size: 20px !important; }
             .portal-signout-btn { padding: 6px 12px !important; font-size: 11.2px !important; }
         }
+        
+        /* --- MOBILE SPLASH SCREEN --- */
+        #splashScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #0056D2;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            opacity: 1;
+            transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #splashLogo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 38px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.03em;
+            display: flex;
+            gap: 1.5px;
+            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        #splashLogo span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: letterReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: calc(var(--i) * 0.06s);
+        }
+        @keyframes letterReveal {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        #splashScreen.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+        @media (max-width: 680px) {
+            #splashScreen.mobile-active {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
-<div id="mobileSplash" class="mobile-splash">
-    <h1>QRAnalytics</h1>
-</div>
+    <!-- Mobile Splash Screen -->
+    <div id="splashScreen">
+        <div id="splashLogo">
+            <span style="--i:0">Q</span>
+            <span style="--i:1">R</span>
+            <span style="--i:2">A</span>
+            <span style="--i:3">n</span>
+            <span style="--i:4">a</span>
+            <span style="--i:5">l</span>
+            <span style="--i:6">y</span>
+            <span style="--i:7">t</span>
+            <span style="--i:8">i</span>
+            <span style="--i:9">c</span>
+            <span style="--i:10">s</span>
+        </div>
+    </div>
+    <script>
+        (function() {
+            const isMobile = window.innerWidth <= 680;
+            const hasSession = !!localStorage.getItem('qrl_session');
+            const splash = document.getElementById('splashScreen');
+            if (isMobile && !hasSession) {
+                splash.classList.add('mobile-active');
+                // Fade out after 1.5 seconds.
+                setTimeout(() => {
+                    splash.classList.add('fade-out');
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                        splash.classList.remove('mobile-active');
+                    }, 500);
+                }, 1500);
+            } else {
+                splash.style.display = 'none';
+            }
+        })();
+    </script>
 <div style="display: flex; height: 100vh; overflow: hidden; width: 100vw;">
     <aside class="sidebar hidden" id="mainSidebar">
         <div class="sidebar-header">
@@ -1012,31 +1117,22 @@
     <main class="side-content">
         
         <div id="loginSection" class="container">
-            <div style="text-align: center; margin-bottom: 25.6px;" class="login-header-desktop">
+            <div style="text-align: center; margin-bottom: 25.6px;">
                 <h1 class="qrlytics-title-header mobile-only" style="font-size: 28.8px; margin-bottom: 12.8px; justify-content: center;">QRAnalytics</h1>
                 <h2 style="color: #000000; font-size: 20.8px; margin-bottom: 6.4px; font-weight: 800; letter-spacing: -0.4px;">Welcome</h2>
                 <p style="color: #64748b; font-size: 10.4px; margin-top: 0;">Please enter your credentials to continue</p>
             </div>
-            
-            <div class="login-header-mobile" style="display: none;">
-                <h1>QRAnalytics</h1>
-                <p>Sign in to continue</p>
-            </div>
 
-            <div class="input-wrapper-mobile">
-                <svg class="left-icon" style="display: none;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                <input type="text" id="username" placeholder="Username" style="border: 1px solid #e2e8f0; border-radius: 6.4px; padding: 11.2px 12.8px; width: 100%; box-sizing: border-box; margin-bottom: 12.8px; font-size: 11.2px; background: #f8fafc;" onkeypress="if(event.key === 'Enter') document.getElementById('password').focus()">
-            </div>
+            <input type="text" id="username" placeholder="Username" style="border: 1px solid #e2e8f0; border-radius: 6.4px; padding: 11.2px 12.8px; width: 100%; box-sizing: border-box; margin-bottom: 12.8px; font-size: 11.2px; background: #f8fafc;" onkeypress="if(event.key === 'Enter') document.getElementById('password').focus()">
             
-            <div class="input-wrapper-mobile" style="position: relative; width: 100%; display: block;">
-                <svg class="left-icon" style="display: none;" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+            <div style="position: relative; width: 100%; display: block;">
                 <input type="password" id="password" placeholder="Password" style="border: 1px solid #e2e8f0; border-radius: 6.4px; padding: 11.2px 12.8px; width: 100%; box-sizing: border-box; padding-right: 32px; font-size: 11.2px; background: #f8fafc;" onkeypress="if(event.key === 'Enter') performLogin()">
                 <button type="button" onclick="const p = document.getElementById('password'); p.type = p.type === 'password' ? 'text' : 'password';" style="position: absolute; right: 6.4px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0; color: #00f3ff; display: flex; align-items: center; justify-content: center; height: 25.6px; width: 25.6px; z-index: 10;">
                     <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 </button>
             </div>
             
-            <label class="remember-me-container" style="display:flex; align-items:center; font-weight:500; gap:8px; margin-top:12.8px; margin-bottom: 19.2px; font-size:9.6px; cursor:pointer; color: #64748b;">
+            <label style="display:flex; align-items:center; font-weight:500; gap:8px; margin-top:12.8px; margin-bottom: 19.2px; font-size:9.6px; cursor:pointer; color: #64748b;">
                 <input type="checkbox" id="rememberMe"> Remember my session
             </label>
 
@@ -1044,7 +1140,7 @@
             <div id="loginLoader"></div>
             <p id="loginError" style="color: var(--danger-red); display:none; text-align:center; font-weight:500; font-size: 10.4px; margin-top:16px; background: #fef2f2; padding: 9.6px; border-radius: var(--radius-md); border: 1px solid #fecaca;">Access Denied. Please check your credentials.</p>
             
-            <div class="footer-copyright" style="text-align: center; margin-top: auto; padding-top: 25.6px; font-size: 8px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">&copy; 2026 QRAnalytics | SECURE LOGIN</div>
+            <div class="login-copyright" style="text-align: center; margin-top: auto; padding-top: 25.6px; font-size: 8px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;">&copy; 2026 QRAnalytics | SECURE LOGIN</div>
         </div>
 
         <div id="attendanceSection" class="container hidden">
@@ -2683,224 +2779,13 @@
                 plugins: {
                     legend: { display: true },
                     datalabels: {
-                document.getElementById('attScanBtn').innerHTML = `<svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-right: 4.8px; vertical-align: middle;"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"></path></svg> Mark OUT Time`;
-                document.getElementById('attActionBox').style.display = 'flex';
-                showAttendanceSummary(res.details);
-            } else {
-                document.getElementById('attMainSub').innerText = "Attendance completed for today.";
-                document.getElementById('attActionBox').style.display = 'none';
-                showAttendanceSummary(res.details);
-            }
-        } catch(e) {
-            document.getElementById('attLoadingBox').style.display = 'none';
-            document.getElementById('attMainSub').innerText = "Error loading status.";
-        }
-    }
-
-    function showAttendanceSummary(details) {
-        if (!details) return;
-        document.getElementById('sumName').innerText = details.name || currentUser.name;
-        document.getElementById('sumDate').innerText = details.date;
-        document.getElementById('sumIn').innerText = details.inTime || '--';
-        document.getElementById('sumOut').innerText = details.outTime || '--';
-        document.getElementById('attSummaryBox').classList.remove('hidden');
-    }
-
-    function showAttendanceScanner(fromPopState = false) {
-        document.getElementById('attendanceInitial').classList.add('hidden');
-        document.getElementById('attendanceQrBox').classList.remove('hidden');
-        if (!fromPopState) history.pushState({ view: 'scanner' }, '', '#scanner');
-        attendanceQrScanner = new Html5Qrcode("attendanceReader");
-        attendanceQrScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 220 }, (text) => {
-            attendanceQrScanner.stop().then(() => {
-                document.getElementById('attendanceQrBox').classList.add('hidden');
-                
-                document.getElementById('attConfirmTitle').innerText = `Confirm ${attendanceContextType} Time`;
-                document.getElementById('attQrId').value = text;
-                document.getElementById('attEmpName').innerText = currentUser.name;
-                const now = new Date();
-                document.getElementById('attDate').innerText = now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
-                document.getElementById('attTime').innerText = now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit' });
-                
-                document.getElementById('attendanceConfirmBox').classList.remove('hidden');
-            });
-        }).catch(() => alert("Camera error or permission denied."));
-    }
-
-    function cancelAttendanceScanner(fromPopState = false) {
-        if (!fromPopState && history.state && history.state.view === 'scanner') {
-            history.back();
-            return;
-        }
-        if(attendanceQrScanner) {
-            try { attendanceQrScanner.stop(); } catch(e){}
-        }
-        document.getElementById('attendanceQrBox').classList.add('hidden');
-        document.getElementById('attendanceConfirmBox').classList.add('hidden');
-        document.getElementById('attendanceInitial').classList.remove('hidden');
-    }
-
-    async function submitAttendance() {
-        const btn = document.getElementById('attSubmitBtn');
-        btn.innerText = "Submitting...";
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
-        
-        const now = new Date();
-        const payload = {
-            action: 'markAttendance',
-            userId: currentUser.name,
-            employeeName: currentUser.name,
-            clientId: currentUser.clientId,
-            date: now.toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' }),
-            time: now.toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata', hour12: true, hour: '2-digit', minute: '2-digit' }),
-            day: now.toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', weekday: 'long' }),
-            qrId: document.getElementById('attQrId').value,
-            type: attendanceContextType
-        };
-        
-        try {
-            const response = await fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) });
-            const resData = await response.json();
-            if (!resData.success) throw new Error(resData.message || "Submission failed");
-
-            alert(`${attendanceContextType} Time marked successfully!`); 
-            cancelAttendanceScanner();
-            initAttendanceStatus();
-        } catch(error) {
-            console.error("Submission failed:", error);
-            alert(error.message || "Failed to mark attendance.");
-        } finally {
-            btn.innerText = "Mark Attendance";
-            btn.disabled = false;
-            btn.style.opacity = "1";
-        }
-    }
-
-    // --- ATTENDANCE REPORT LOGIC ---
-
-    let attRawData = [];
-    let attChartInstance = null;
-
-    flatpickr("#attFilterDate", {
-        dateFormat: "d/m/Y",
-        onChange: function() {
-            renderAttendanceReport();
-        }
-    });
-
-    async function loadAttendanceData() {
-        document.getElementById('attReportTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px;">Loading data...</td></tr>';
-        try {
-            const resp = await fetch(`${scriptURL}?action=getAllAttendance`);
-            attRawData = await resp.json();
-            renderAttendanceReport();
-        } catch (e) {
-            console.error(e);
-            document.getElementById('attReportTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px; color: red;">Error loading data.</td></tr>';
-        }
-    }
-
-    function renderAttendanceReport() {
-        const dateFilter = document.getElementById('attFilterDate').value;
-        const userFilter = document.getElementById('attFilterUser').value.toLowerCase();
-
-        let filtered = attRawData;
-
-        if (dateFilter) {
-            filtered = filtered.filter(r => r.date === dateFilter);
-        }
-        if (userFilter) {
-            filtered = filtered.filter(r => (r.name || r.userId).toLowerCase().includes(userFilter));
-        }
-
-        const tbody = document.getElementById('attReportTableBody');
-        if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 24px;">No attendance records found.</td></tr>';
-        } else {
-            tbody.innerHTML = filtered.map(r => `
-                <tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 12.8px; font-size: 10.4px;">${r.name || r.userId}</td>
-                    <td style="padding: 12.8px; font-size: 10.4px;">${r.date}</td>
-                    <td style="padding: 12.8px; font-size: 10.4px; font-weight: 500;">${r.inTime || '--'}</td>
-                    <td style="padding: 12.8px; font-size: 10.4px; font-weight: 500;">${r.outTime || '--'}</td>
-                    <td style="padding: 12.8px; font-size: 10.4px;">
-                        <span style="background: ${r.inTime ? 'var(--success-green)' : 'var(--danger-red)'}; color: white; padding: 3.2px 6.4px; border-radius: 3.2px; font-size: 8.8px;">
-                            ${r.inTime ? 'Present' : 'Absent'}
-                        </span>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        updateAttendanceChart(filtered);
-    }
-
-    function updateAttendanceChart(data) {
-        const ctx = document.getElementById('attendanceChart').getContext('2d');
-        if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
-        
-        // Group by Date for Present count
-        const dateCounts = {};
-        data.forEach(r => {
-            if (r.inTime) {
-                if (!dateCounts[r.date]) dateCounts[r.date] = new Set();
-                dateCounts[r.date].add(r.userId);
-            }
-        });
-
-        const labels = Object.keys(dateCounts).sort((a,b) => {
-            let [d1, m1, y1] = a.split('/');
-            let [d2, m2, y2] = b.split('/');
-            return new Date(y1, m1-1, d1) - new Date(y2, m2-1, d2);
-        });
-        const presentData = labels.map(d => dateCounts[d].size);
-
-        if (attChartInstance) attChartInstance.destroy();
-
-        attChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Total Present',
-                    data: presentData,
-                    backgroundColor: '#4f46e5',
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
-                },
-                plugins: {
-                    legend: { display: true },
-                    datalabels: {
                         color: '#fff',
                         font: { weight: 'bold' }
                     }
                 }
             }
         });
-        updateDateTime();
-        setInterval(updateDateTime, 60000);
     }
-
-    // Mobile splash screen logic
-    (function() {
-        const splash = document.getElementById('mobileSplash');
-        if (splash && window.innerWidth <= 680) {
-            splash.style.display = 'flex';
-            setTimeout(() => {
-                splash.style.opacity = '0';
-                setTimeout(() => { splash.style.display = 'none'; }, 500);
-            }, 3000);
-        } else if (splash) {
-            splash.style.display = 'none';
-        }
-    })();
 
 </script>
 </div>
